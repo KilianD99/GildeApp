@@ -1,4 +1,7 @@
 
+using GildeApp.Api.Core.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace GildeApp.Api
 {
     public class Program
@@ -6,6 +9,9 @@ namespace GildeApp.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDatabase")));
 
             // Add services to the container.
 
