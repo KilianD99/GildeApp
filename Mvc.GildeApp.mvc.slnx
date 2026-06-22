@@ -1,3 +1,10 @@
 <Solution>
-  <Project Path="Mvc.GildeApp.mvc/Mvc.GildeApp.mvc.csproj" />
+  <Folder Name="/Api/">
+    <Project Path="GildeApp.Api.Core/GildeApp.Api.Core.csproj" />
+    <Project Path="GildeApp.Api/GildeApp.Api.csproj" />
+  </Folder>
+  <Folder Name="/Clients/">
+    <Project Path="Mvc.GildeApp.mvc/Mvc.GildeApp.mvc.csproj" />
+  </Folder>
+  <Folder Name="/Libaries/" />
 </Solution>

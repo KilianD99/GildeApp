@@ -1,0 +1,6 @@
+@GildeApp.Api_HostAddress = http://localhost:5069
+
+GET {{GildeApp.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
