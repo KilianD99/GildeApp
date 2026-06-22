@@ -19,8 +19,21 @@ namespace GildeApp.Api.Core.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);   
+
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.FirstPlayer)
+                .WithMany()
+                .HasForeignKey(m => m.FirstPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.SecondPlayer)
+                .WithMany()
+                .HasForeignKey(m => m.SecondPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             Seeder.Seed(modelBuilder);
-            base.OnModelCreating(modelBuilder);
         }
     }
 }

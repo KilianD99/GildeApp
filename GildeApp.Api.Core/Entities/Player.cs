@@ -6,8 +6,9 @@ namespace GildeApp.Api.Core.Entities
 {
     public class Player : BaseEntity
     {
-        public int FirstName { get; set; }
-        public int LastName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public Guid TourneyId { get; set; }
         public Tourney Tourney { get; set; }
     }
 }

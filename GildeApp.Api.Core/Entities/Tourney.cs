@@ -4,10 +4,12 @@ using System.Text;
 
 namespace GildeApp.Api.Core.Entities
 {
-    public class Tourney
+    public class Tourney : BaseEntity
     {
         public string Name { get; set; }
         public ICollection<Player> Players { get; set; }
+        public ICollection<Match>  Matches { get; set; }
+        public Guid RuleSetId { get; set; }
         public RuleSet RuleSet { get; set; }
     }
 }
