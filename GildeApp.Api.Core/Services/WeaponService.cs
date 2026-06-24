@@ -32,7 +32,7 @@ namespace GildeApp.Api.Core.Services
             throw new NotImplementedException();
         }
 
-        public IQueryable<Weapon> GetAllMatches()
+        public IQueryable<Weapon> GetAllWeapons()
         {
             throw new NotImplementedException();
         }

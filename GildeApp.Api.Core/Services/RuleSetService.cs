@@ -43,13 +43,13 @@ namespace GildeApp.Api.Core.Services
 
         public async Task<bool> DoesRuleSetIdExistsAsync(Guid id)
         {
-            bool doesRuleSetExist = await _dbContext.Players
+            bool doesRuleSetExist = await _dbContext.RuleSets
                  .AnyAsync(b => b.Id.Equals(id));
 
             return doesRuleSetExist;
         }
 
-        public IQueryable<RuleSet> GetAllMatches()
+        public IQueryable<RuleSet> GetAllRuleSets()
         {
             return _dbContext.RuleSets.AsQueryable();
         }

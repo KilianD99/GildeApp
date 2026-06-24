@@ -8,7 +8,7 @@ namespace GildeApp.Api.Core.Services.Interfaces
 {
     public interface IRuleSetService
     {
-        IQueryable<RuleSet> GetAllMatches();
+        IQueryable<RuleSet> GetAllRuleSets();
         Task<ResultModel<IEnumerable<RuleSet>>> ListAllAsync();
         Task<ResultModel<RuleSet>> GetByIdAsync(Guid id);
         Task<bool> DoesRuleSetIdExistsAsync(Guid id);

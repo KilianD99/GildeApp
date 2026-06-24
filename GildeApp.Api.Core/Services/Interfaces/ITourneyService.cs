@@ -8,7 +8,7 @@ namespace GildeApp.Api.Core.Services.Interfaces
 {
     public interface ITourneyService
     {
-        IQueryable<Tourney> GetAllMatches();
+        IQueryable<Tourney> GetAllTourneys();
         Task<ResultModel<IEnumerable<Tourney>>> ListAllAsync();
         Task<ResultModel<Tourney>> GetByIdAsync(Guid id);
         Task<bool> DoesTourneyIdExistsAsync(Guid id);
