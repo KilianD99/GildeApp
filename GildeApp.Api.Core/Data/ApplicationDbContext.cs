@@ -13,6 +13,7 @@ namespace GildeApp.Api.Core.Data
         public DbSet<RuleSet> RuleSets { get; set; }
         public DbSet<Tourney> Tourneys { get; set; }
         public DbSet<Weapon> Weapons { get; set; }
+        public DbSet<Match> Matches { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

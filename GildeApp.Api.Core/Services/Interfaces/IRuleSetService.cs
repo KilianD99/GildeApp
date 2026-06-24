@@ -10,8 +10,8 @@ namespace GildeApp.Api.Core.Services.Interfaces
     {
         IQueryable<RuleSet> GetAllMatches();
         Task<ResultModel<IEnumerable<RuleSet>>> ListAllAsync();
-        Task<ResultModel<RuleSet>> GetByIdAsync(int id);
-        Task<bool> DoesRuleSetIdExistsAsync(int id);
+        Task<ResultModel<RuleSet>> GetByIdAsync(Guid id);
+        Task<bool> DoesRuleSetIdExistsAsync(Guid id);
         Task<ResultModel<RuleSet>> UpdateAsync(RuleSet entity);
         Task<ResultModel<RuleSet>> AddAsync(RuleSet entity);
         Task<ResultModel<RuleSet>> DeleteAsync(RuleSet entity);

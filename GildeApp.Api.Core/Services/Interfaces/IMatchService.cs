@@ -10,8 +10,8 @@ namespace GildeApp.Api.Core.Services.Interfaces
     {
         IQueryable<Match> GetAllMatches();
         Task<ResultModel<IEnumerable<Match>>> ListAllAsync();
-        Task<ResultModel<Match>> GetByIdAsync(int id);
-        Task<bool> DoesMatchIdExistsAsync(int id);
+        Task<ResultModel<Match>> GetByIdAsync(Guid id);
+        Task<bool> DoesMatchIdExistsAsync(Guid id);
         Task<ResultModel<Match>> UpdateAsync(Match entity);
         Task<ResultModel<Match>> AddAsync(Match entity);
         Task<ResultModel<Match>> DeleteAsync(Match entity);
