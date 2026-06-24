@@ -1,5 +1,7 @@
 
 using GildeApp.Api.Core.Data;
+using GildeApp.Api.Core.Services;
+using GildeApp.Api.Core.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GildeApp.Api
@@ -29,6 +31,11 @@ namespace GildeApp.Api
                 app.UseSwaggerUI();   // serves UI at /swagger, reading /swagger/v1/swagger.json
             }
 
+            builder.Services.AddScoped<IMatchService, MatchService>();
+            builder.Services.AddScoped<IPlayerService, PlayerService>();
+            builder.Services.AddScoped<IRuleSetService, RuleSetService>();
+            builder.Services.AddScoped<ITourneyService, TourneyService>();
+            builder.Services.AddScoped<IWeaponService, WeaponService>();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
