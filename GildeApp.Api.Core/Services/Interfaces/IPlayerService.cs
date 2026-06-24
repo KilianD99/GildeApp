@@ -8,7 +8,7 @@ namespace GildeApp.Api.Core.Services.Interfaces
 {
     public interface IPlayerService
     {
-            IQueryable<Player> GetAllMatches();
+            IQueryable<Player> GetAllPlayers();
             Task<ResultModel<IEnumerable<Player>>> ListAllAsync();
             Task<ResultModel<Player>> GetByIdAsync(Guid id);
             Task<bool> DoesPlayerIdExistsAsync(Guid id);

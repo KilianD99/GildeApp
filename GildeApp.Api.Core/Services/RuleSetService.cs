@@ -5,6 +5,7 @@ using GildeApp.Api.Core.Data;
 using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GildeApp.Api.Core.Services
 {
@@ -17,39 +18,90 @@ namespace GildeApp.Api.Core.Services
             _dbContext = dbContext;
         }
 
-        public Task<ResultModel<RuleSet>> AddAsync(RuleSet entity)
+        public async Task<ResultModel<RuleSet>> AddAsync(RuleSet entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<RuleSet>();
+            _dbContext.RuleSets.Add(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel = new ResultModel<RuleSet> { Data = entity };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<RuleSet>> DeleteAsync(RuleSet entity)
+        public async Task<ResultModel<RuleSet>> DeleteAsync(RuleSet entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<RuleSet>();
+
+            _dbContext.RuleSets.Remove(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel.Data = entity;
+
+            return resultModel;
         }
 
-        public Task<bool> DoesRuleSetIdExistsAsync(int id)
+        public async Task<bool> DoesRuleSetIdExistsAsync(Guid id)
         {
-            throw new NotImplementedException();
+            bool doesRuleSetExist = await _dbContext.Players
+                 .AnyAsync(b => b.Id.Equals(id));
+
+            return doesRuleSetExist;
         }
 
         public IQueryable<RuleSet> GetAllMatches()
         {
-            throw new NotImplementedException();
+            return _dbContext.RuleSets.AsQueryable();
         }
 
-        public Task<ResultModel<RuleSet>> GetByIdAsync(int id)
+        public async Task<ResultModel<RuleSet>> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<RuleSet>();
+            var ruleSet = await _dbContext.RuleSets
+                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+
+
+            if (ruleSet is null)
+            {
+                resultModel = new ResultModel<RuleSet>();
+                resultModel.Errors.Add($"RuleSet does not exists");
+
+                return resultModel;
+            }
+
+            resultModel = new ResultModel<RuleSet> { Data = ruleSet };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<IEnumerable<RuleSet>>> ListAllAsync()
+        public async Task<ResultModel<IEnumerable<RuleSet>>> ListAllAsync()
         {
-            throw new NotImplementedException();
+            var ruleSets = await _dbContext.RuleSets.ToListAsync();
+            var resultModel = new ResultModel<IEnumerable<RuleSet>>
+            {
+                Data = ruleSets
+            };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<RuleSet>> UpdateAsync(RuleSet entity)
+        public async Task<ResultModel<RuleSet>> UpdateAsync(RuleSet entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<RuleSet>();
+
+            if (await DoesRuleSetIdExistsAsync(entity.Id) == false)
+            {
+                resultModel.Errors.Add($"There is no RuleSet with the ID {entity.Id}");
+
+                return resultModel;
+            }
+
+
+            _dbContext.RuleSets.Update(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel = new ResultModel<RuleSet> { Data = entity };
+            return resultModel;
         }
     }
 }

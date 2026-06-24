@@ -27,7 +27,7 @@ namespace GildeApp.Api.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> DoesTourneyIdExistsAsync(int id)
+        public Task<bool> DoesTourneyIdExistsAsync(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -37,7 +37,7 @@ namespace GildeApp.Api.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<ResultModel<Tourney>> GetByIdAsync(int id)
+        public Task<ResultModel<Tourney>> GetByIdAsync(Guid id)
         {
             throw new NotImplementedException();
         }

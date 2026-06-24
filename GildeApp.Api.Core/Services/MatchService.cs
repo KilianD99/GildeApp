@@ -43,10 +43,10 @@ namespace GildeApp.Api.Core.Services
 
         public async Task<bool> DoesMatchIdExistsAsync(Guid id)
         {
-            bool doesBackgroundExist = await _dbContext.Matches
+            bool doesMatchExist = await _dbContext.Matches
                  .AnyAsync(b => b.Id.Equals(id));
 
-            return doesBackgroundExist;
+            return doesMatchExist;
         }
 
         public IQueryable<Match> GetAllMatches()
@@ -57,11 +57,11 @@ namespace GildeApp.Api.Core.Services
         public async Task<ResultModel<Match>> GetByIdAsync(Guid id)
         {
             var resultModel = new ResultModel<Match>();
-            var background = await _dbContext.Matches
+            var match = await _dbContext.Matches
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
 
 
-            if (background is null)
+            if (match is null)
             {
                 resultModel = new ResultModel<Match>();
                 resultModel.Errors.Add($"Match does not exists");
@@ -69,17 +69,17 @@ namespace GildeApp.Api.Core.Services
                 return resultModel;
             }
 
-            resultModel = new ResultModel<Match> { Data = background };
+            resultModel = new ResultModel<Match> { Data = match };
 
             return resultModel;
         }
 
         public async Task<ResultModel<IEnumerable<Match>>> ListAllAsync()
         {
-            var backgrounds = await _dbContext.Matches.ToListAsync();
+            var matches = await _dbContext.Matches.ToListAsync();
             var resultModel = new ResultModel<IEnumerable<Match>>
             {
-                Data = backgrounds
+                Data = matches
             };
 
             return resultModel;

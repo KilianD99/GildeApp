@@ -27,7 +27,7 @@ namespace GildeApp.Api.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> DoesWeaponIdExistsAsync(int id)
+        public Task<bool> DoesWeaponIdExistsAsync(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -37,7 +37,7 @@ namespace GildeApp.Api.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<ResultModel<Weapon>> GetByIdAsync(int id)
+        public Task<ResultModel<Weapon>> GetByIdAsync(Guid id)
         {
             throw new NotImplementedException();
         }
