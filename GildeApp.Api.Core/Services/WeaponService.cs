@@ -5,6 +5,7 @@ using GildeApp.Api.Core.Data;
 using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GildeApp.Api.Core.Services
 {
@@ -17,39 +18,90 @@ namespace GildeApp.Api.Core.Services
             _dbContext = dbContext;
         }
 
-        public Task<ResultModel<Weapon>> AddAsync(Weapon entity)
+        public async Task<ResultModel<Weapon>> AddAsync(Weapon entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<Weapon>();
+            _dbContext.Weapons.Add(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel = new ResultModel<Weapon> { Data = entity };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<Weapon>> DeleteAsync(Weapon entity)
+        public async Task<ResultModel<Weapon>> DeleteAsync(Weapon entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<Weapon>();
+
+            _dbContext.Weapons.Remove(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel.Data = entity;
+
+            return resultModel;
         }
 
-        public Task<bool> DoesWeaponIdExistsAsync(Guid id)
+        public async Task<bool> DoesWeaponIdExistsAsync(Guid id)
         {
-            throw new NotImplementedException();
+            bool doesWeaponExists = await _dbContext.Weapons
+                 .AnyAsync(b => b.Id.Equals(id));
+
+            return doesWeaponExists;
         }
 
         public IQueryable<Weapon> GetAllWeapons()
         {
-            throw new NotImplementedException();
+            return _dbContext.Weapons.AsQueryable();
         }
 
-        public Task<ResultModel<Weapon>> GetByIdAsync(Guid id)
+        public async Task<ResultModel<Weapon>> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<Weapon>();
+            var weapon = await _dbContext.Weapons
+                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+
+
+            if (weapon is null)
+            {
+                resultModel = new ResultModel<Weapon>();
+                resultModel.Errors.Add($"Weapon does not exists");
+
+                return resultModel;
+            }
+
+            resultModel = new ResultModel<Weapon> { Data = weapon };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<IEnumerable<Weapon>>> ListAllAsync()
+        public async Task<ResultModel<IEnumerable<Weapon>>> ListAllAsync()
         {
-            throw new NotImplementedException();
+            var weapons = await _dbContext.Weapons.ToListAsync();
+            var resultModel = new ResultModel<IEnumerable<Weapon>>
+            {
+                Data = weapons
+            };
+
+            return resultModel;
         }
 
-        public Task<ResultModel<Weapon>> UpdateAsync(Weapon entity)
+        public async Task<ResultModel<Weapon>> UpdateAsync(Weapon entity)
         {
-            throw new NotImplementedException();
+            var resultModel = new ResultModel<Weapon>();
+
+            if (await DoesWeaponIdExistsAsync(entity.Id) == false)
+            {
+                resultModel.Errors.Add($"There is no Weapon with the ID {entity.Id}");
+
+                return resultModel;
+            }
+
+
+            _dbContext.Weapons.Update(entity);
+            await _dbContext.SaveChangesAsync();
+
+            resultModel = new ResultModel<Weapon> { Data = entity };
+            return resultModel;
         }
     }
 }
