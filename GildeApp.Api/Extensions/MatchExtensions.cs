@@ -7,7 +7,7 @@ namespace GildeApp.Api.Extensions
 {
     public static class MatchExtensions
     {
-        public static MatchDto ToDto(this Match match)
+        public static MatchDto ToMatchDto(this Match match)
         {
             return new MatchDto
             {
@@ -16,12 +16,12 @@ namespace GildeApp.Api.Extensions
             };
         }
 
-        public static IEnumerable<MatchDto> ToDto(this IEnumerable<Match> matches)
+        public static IEnumerable<MatchDto> ToMatchDtoList(this IEnumerable<Match> matches)
         {
-            return matches.Select(a => a.ToDto());
+            return matches.Select(a => a.ToMatchDto());
         }
 
-        public static MatchDetailDto ToDetailDto(this Match match)
+        public static MatchDetailDto ToDetailMatchDto(this Match match)
         {
             return new MatchDetailDto
             {

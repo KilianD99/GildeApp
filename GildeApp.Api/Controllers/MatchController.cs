@@ -26,7 +26,7 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result.Errors);
 
-            var dtos = result.Data.ToDto();
+            var dtos = result.Data.ToMatchDtoList();
             return Ok(new ResultModel<List<MatchDto>> { Data = dtos.ToList() });
         }
 
@@ -38,7 +38,7 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
 
-            var dto = result.Data.ToDetailDto();
+            var dto = result.Data.ToDetailMatchDto();
             return Ok(new ResultModel<MatchDetailDto> { Data = dto });
         }
 
@@ -65,7 +65,7 @@ namespace GildeApp.Api.Controllers
 
                 if (createdMatch.IsSuccess)
                 {
-                    var dto = createdMatch.Data.ToDetailDto();
+                    var dto = createdMatch.Data.ToDetailMatchDto();
                     return CreatedAtAction(nameof(GetById), new { id =  match.Id }, new ResultModel<MatchDetailDto> { Data = dto });
                 }
             }
@@ -103,7 +103,7 @@ namespace GildeApp.Api.Controllers
 
                 if (updatedPlaylist.IsSuccess)
                 {
-                    var dto = updatedPlaylist.Data.ToDetailDto();
+                    var dto = updatedPlaylist.Data.ToDetailMatchDto();
                     return Ok(new ResultModel<MatchDetailDto> { Data = dto });
                 }
             }
