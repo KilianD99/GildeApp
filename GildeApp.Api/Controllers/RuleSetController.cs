@@ -14,9 +14,6 @@ namespace GildeApp.Api.Controllers
             _ruleSetService = ruleSetService;
         }
 
-        public IActionResult Index()
-        {
-            return Ok();
-        }
+        
     }
 }

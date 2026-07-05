@@ -51,13 +51,20 @@ namespace GildeApp.Api.Core.Services
 
         public IQueryable<Match> GetAllMatches()
         {
-            return _dbContext.Matches.AsQueryable();
+            return _dbContext.Matches
+                    .Include(m => m.FirstPlayer)
+                    .Include(m => m.SecondPlayer)
+                    .Include(m => m.Tourney)
+                    .AsQueryable();
         }
 
         public async Task<ResultModel<Match>> GetByIdAsync(Guid id)
         {
             var resultModel = new ResultModel<Match>();
             var match = await _dbContext.Matches
+                .Include(m => m.FirstPlayer)
+                .Include(m => m.SecondPlayer)
+                .Include(m => m.Tourney)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
 
 
@@ -72,11 +79,17 @@ namespace GildeApp.Api.Core.Services
             resultModel = new ResultModel<Match> { Data = match };
 
             return resultModel;
+
+
         }
 
         public async Task<ResultModel<IEnumerable<Match>>> ListAllAsync()
         {
-            var matches = await _dbContext.Matches.ToListAsync();
+            var matches = await _dbContext.Matches
+                                .Include(m => m.FirstPlayer)
+                                .Include(m => m.SecondPlayer)
+                                .Include(m => m.Tourney)                               
+                                .ToListAsync();
             var resultModel = new ResultModel<IEnumerable<Match>>
             {
                 Data = matches

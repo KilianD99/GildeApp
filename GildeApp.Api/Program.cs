@@ -22,6 +22,12 @@ namespace GildeApp.Api
             builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddScoped<IMatchService, MatchService>();
+            builder.Services.AddScoped<IPlayerService, PlayerService>();
+            builder.Services.AddScoped<IRuleSetService, RuleSetService>();
+            builder.Services.AddScoped<ITourneyService, TourneyService>();
+            builder.Services.AddScoped<IWeaponService, WeaponService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -31,11 +37,7 @@ namespace GildeApp.Api
                 app.UseSwaggerUI();   // serves UI at /swagger, reading /swagger/v1/swagger.json
             }
 
-            builder.Services.AddScoped<IMatchService, MatchService>();
-            builder.Services.AddScoped<IPlayerService, PlayerService>();
-            builder.Services.AddScoped<IRuleSetService, RuleSetService>();
-            builder.Services.AddScoped<ITourneyService, TourneyService>();
-            builder.Services.AddScoped<IWeaponService, WeaponService>();
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

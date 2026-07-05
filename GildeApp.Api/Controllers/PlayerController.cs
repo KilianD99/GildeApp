@@ -14,9 +14,6 @@ namespace GildeApp.Api.Controllers
             _playerService = playerService;
         }
 
-        public IActionResult Index()
-        {
-            return Ok();
-        }
+        
     }
 }

@@ -14,9 +14,6 @@ namespace GildeApp.Api.Controllers
             _weaponService = weaponService;
         }
 
-        public IActionResult Index()
-        {
-            return Ok();
-        }
+        
     }
 }

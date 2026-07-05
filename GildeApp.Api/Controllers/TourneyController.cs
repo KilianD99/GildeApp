@@ -14,9 +14,6 @@ namespace GildeApp.Api.Controllers
             _tourneyService = tourneyService;
         }
 
-        public IActionResult Index()
-        {
-            return Ok();
-        }
+       
     }
 }

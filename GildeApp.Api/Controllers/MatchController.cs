@@ -1,4 +1,8 @@
-﻿using GildeApp.Api.Core.Services.Interfaces;
+﻿using GildeApp.Api.Core.Entities;
+using GildeApp.Api.Core.Services.Interfaces;
+using GildeApp.Api.Core.Services.Models;
+using GildeApp.Api.Dtos.Matches;
+using GildeApp.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GildeApp.Api.Controllers
@@ -14,9 +18,126 @@ namespace GildeApp.Api.Controllers
             _matchService = matchService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return Ok();
+            var result = await _matchService.ListAllAsync();
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
+
+            var dtos = result.Data.ToDto();
+            return Ok(new ResultModel<List<MatchDto>> { Data = dtos.ToList() });
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _matchService.GetByIdAsync(id);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Errors);
+
+            var dto = result.Data.ToDetailDto();
+            return Ok(new ResultModel<MatchDetailDto> { Data = dto });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add([FromForm] MatchCreateOrUpdateDto matchListDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var match = new Match
+            {
+                Id = matchListDto.MatchId,
+                SecondPlayer = matchListDto.SecondPlayer,
+                SecondPlayerId = matchListDto.SecondPlayerId,
+                SecondPlayerScore = matchListDto.SecondPlayerScore,
+                FirstPlayerScore = matchListDto.FirstPlayerScore,
+                FirstPlayerId = matchListDto.FirstPlayerId,
+                TourneyId = matchListDto.TourneyId,
+                FirstPlayer = matchListDto.FirstPlayer,
+                Tourney = matchListDto.Tourney,
+            };
+
+            var result = await _matchService.AddAsync(match);
+
+            if (result.IsSuccess)
+            {
+                var createdMatch = await _matchService.GetByIdAsync(match.Id);
+
+                if (createdMatch.IsSuccess)
+                {
+                    var dto = createdMatch.Data.ToDetailDto();
+                    return CreatedAtAction(nameof(GetById), new { id =  match.Id }, new ResultModel<MatchDetailDto> { Data = dto });
+                }
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromForm] MatchCreateOrUpdateDto playlistDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (await _matchService.DoesMatchIdExistsAsync(id) == false)
+                return NotFound(new { message = $"No playlist with id '{id}' found" });
+
+            var existingMatchResult = await _matchService.GetByIdAsync(id);
+
+            if (!existingMatchResult.IsSuccess)
+                return BadRequest(existingMatchResult.Errors);
+
+            var existingMatch = existingMatchResult.Data;
+            existingMatch.Id = id;
+            existingMatch.FirstPlayerId = playlistDto.FirstPlayerId;
+            existingMatch.FirstPlayer = playlistDto.FirstPlayer;
+            existingMatch.FirstPlayerScore = playlistDto.FirstPlayerScore;
+            existingMatch.SecondPlayerId = playlistDto.SecondPlayerId;
+            existingMatch.SecondPlayerScore = playlistDto.SecondPlayerScore;
+            existingMatch.SecondPlayer = playlistDto.SecondPlayer;
+            existingMatch.Tourney = playlistDto.Tourney;
+            existingMatch.TourneyId = playlistDto.TourneyId;
+
+            var result = await _matchService.UpdateAsync(existingMatch);
+
+            if (result.IsSuccess)
+            {
+                var updatedPlaylist = await _matchService.GetByIdAsync(id);
+
+                if (updatedPlaylist.IsSuccess)
+                {
+                    var dto = updatedPlaylist.Data.ToDetailDto();
+                    return Ok(new ResultModel<MatchDetailDto> { Data = dto });
+                }
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (await _matchService.DoesMatchIdExistsAsync(id) == false)
+                return NotFound(new { message = $"No match with an id of {id}" });
+
+            var existingMatch = await _matchService.GetByIdAsync(id);
+
+            if (!existingMatch.IsSuccess)
+                return BadRequest(existingMatch.Errors);
+
+        
+
+            var result = await _matchService.DeleteAsync(existingMatch.Data);
+
+            if (result.IsSuccess)
+                return Ok(new { message = $"Playlist {existingMatch.Data.Id} deleted successfully" });
+
+            return BadRequest(result.Errors);
+        }
+
     }
 }
