@@ -51,13 +51,16 @@ namespace GildeApp.Api.Core.Services
 
         public IQueryable<RuleSet> GetAllRuleSets()
         {
-            return _dbContext.RuleSets.AsQueryable();
+            return _dbContext.RuleSets
+                .Include(r => r.Weapon)
+                .AsQueryable();
         }
 
         public async Task<ResultModel<RuleSet>> GetByIdAsync(Guid id)
         {
             var resultModel = new ResultModel<RuleSet>();
             var ruleSet = await _dbContext.RuleSets
+                .Include(r =>r.Weapon)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
 
 
@@ -76,7 +79,7 @@ namespace GildeApp.Api.Core.Services
 
         public async Task<ResultModel<IEnumerable<RuleSet>>> ListAllAsync()
         {
-            var ruleSets = await _dbContext.RuleSets.ToListAsync();
+            var ruleSets = await _dbContext.RuleSets.Include(r => r.Weapon).ToListAsync();
             var resultModel = new ResultModel<IEnumerable<RuleSet>>
             {
                 Data = ruleSets
