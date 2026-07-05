@@ -43,22 +43,18 @@ namespace GildeApp.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromForm] MatchCreateOrUpdateDto matchListDto)
+        public async Task<IActionResult> Add(MatchCreateOrUpdateDto matchDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var match = new Match
             {
-                Id = matchListDto.MatchId,
-                SecondPlayer = matchListDto.SecondPlayer,
-                SecondPlayerId = matchListDto.SecondPlayerId,
-                SecondPlayerScore = matchListDto.SecondPlayerScore,
-                FirstPlayerScore = matchListDto.FirstPlayerScore,
-                FirstPlayerId = matchListDto.FirstPlayerId,
-                TourneyId = matchListDto.TourneyId,
-                FirstPlayer = matchListDto.FirstPlayer,
-                Tourney = matchListDto.Tourney,
+                FirstPlayerId = matchDto.FirstPlayerId,
+                SecondPlayerId = matchDto.SecondPlayerId,
+                TourneyId = matchDto.TourneyId,
+                FirstPlayerScore = matchDto.FirstPlayerScore,
+                SecondPlayerScore = matchDto.SecondPlayerScore,
             };
 
             var result = await _matchService.AddAsync(match);
@@ -78,7 +74,7 @@ namespace GildeApp.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromForm] MatchCreateOrUpdateDto playlistDto)
+        public async Task<IActionResult> Update(Guid id, MatchCreateOrUpdateDto playlistDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -94,12 +90,9 @@ namespace GildeApp.Api.Controllers
             var existingMatch = existingMatchResult.Data;
             existingMatch.Id = id;
             existingMatch.FirstPlayerId = playlistDto.FirstPlayerId;
-            existingMatch.FirstPlayer = playlistDto.FirstPlayer;
             existingMatch.FirstPlayerScore = playlistDto.FirstPlayerScore;
             existingMatch.SecondPlayerId = playlistDto.SecondPlayerId;
             existingMatch.SecondPlayerScore = playlistDto.SecondPlayerScore;
-            existingMatch.SecondPlayer = playlistDto.SecondPlayer;
-            existingMatch.Tourney = playlistDto.Tourney;
             existingMatch.TourneyId = playlistDto.TourneyId;
 
             var result = await _matchService.UpdateAsync(existingMatch);
