@@ -27,8 +27,8 @@ namespace GildeApp.Api.Extensions
                 Name = tourney.Name,
                 RuleSetId = tourney.RuleSetId,
                 RuleSet = tourney.RuleSet.ToRuleSetDto(),
-                Players = tourney.Players.Select(p => p.ToDetailPlayerDto()),
-                Matches = tourney.Matches.Select(m => m.ToDetailMatchDto())
+                Players = tourney.Players.Select(p => p.ToPlayerDto()),
+                Matches = tourney.Matches.Select(m => m.ToMatchDto())
             };
         }
     }
