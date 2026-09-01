@@ -58,6 +58,7 @@ namespace GildeApp.Api.Core.Services
         {
             var resultModel = new ResultModel<Weapon>();
             var weapon = await _dbContext.Weapons
+                .Include(w => w.RuleSets)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
 
 
