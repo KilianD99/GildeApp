@@ -1,5 +1,7 @@
 
 using GildeApp.Api.Core.Data;
+using GildeApp.Api.Core.Services;
+using GildeApp.Api.Core.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GildeApp.Api
@@ -18,14 +20,23 @@ namespace GildeApp.Api
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<IMatchService, MatchService>();
+            builder.Services.AddScoped<IPlayerService, PlayerService>();
+            builder.Services.AddScoped<IRuleSetService, RuleSetService>();
+            builder.Services.AddScoped<ITourneyService, TourneyService>();
+            builder.Services.AddScoped<IWeaponService, WeaponService>();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();   // serves UI at /swagger, reading /swagger/v1/swagger.json
             }
+
 
             app.UseHttpsRedirection();
 
