@@ -1,8 +1,61 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model TourneyListViewModel
+@{
+    ViewData["Title"] = "Tourneys";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="page-head">
+    <h1>Tourneys</h1>
+    <p class="lede">Everything the club has run, and everything running right now.</p>
 </div>
+
+@if (Model.IsEmpty)
+{
+    <div class="empty">
+        <p>No tourneys yet.</p>
+        <a class="btn btn-primary" asp-controller="Tourneys" asp-action="Create">Create the first one</a>
+    </div>
+}
+else
+{
+    @if (Model.Running.Any())
+    {
+        <section class="group">
+            <h2 class="group-title">
+                <span class="live-dot"></span>
+                Running now
+            </h2>
+            <div class="card-grid">
+                @foreach (var tourney in Model.Running)
+                {
+                    <partial name="_TourneyCard" model="tourney" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Setup.Any())
+    {
+        <section class="group">
+            <h2 class="group-title">Being set up</h2>
+            <div class="card-grid">
+                @foreach (var tourney in Model.Setup)
+                {
+                    <partial name="_TourneyCard" model="tourney" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Finished.Any())
+    {
+        <section class="group">
+            <h2 class="group-title">Finished</h2>
+            <div class="card-grid">
+                @foreach (var tourney in Model.Finished)
+                {
+                    <partial name="_TourneyCard" model="tourney" />
+                }
+            </div>
+        </section>
+    }
+}

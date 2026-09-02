@@ -1,0 +1,37 @@
+@model TourneyModel
+@{
+    var target = Model.Status == "Setup" ? "Entries" : "Board";
+    var progress = Model.MatchesTotal == 0
+        ? 0
+        : (int)Math.Round(100.0 * Model.MatchesFinished / Model.MatchesTotal);
+}
+
+<a class="card" asp-controller="Tourneys" asp-action="@target" asp-route-id="@Model.TourneyId">
+    <div class="card-top">
+        <span class="pill pill-@Model.Status.ToLowerInvariant()">@Model.Status</span>
+        <span class="muted mono">@Model.CreatedAt.ToLocalTime().ToString("d MMM yyyy")</span>
+    </div>
+
+    <h3 class="card-title">@Model.Name</h3>
+
+    <div class="card-meta">
+        <span>@Model.PlayerCount player@(Model.PlayerCount == 1 ? "" : "s")</span>
+        @if (!string.IsNullOrEmpty(Model.WeaponName))
+        {
+            <span class="dot-sep"></span>
+            <span>@Model.WeaponName</span>
+        }
+    </div>
+
+    @if (Model.MatchesTotal > 0)
+    {
+        <div class="progress" role="img" aria-label="@Model.MatchesFinished of @Model.MatchesTotal matches finished">
+            <div class="progress-bar" style="width:@(progress)%"></div>
+        </div>
+        <div class="card-meta muted mono">@Model.MatchesFinished / @Model.MatchesTotal matches</div>
+    }
+    else
+    {
+        <div class="card-meta muted">Not started</div>
+    }
+</a>

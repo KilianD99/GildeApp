@@ -1,7 +1,5 @@
-﻿using GildeApp.Api.Core.Entities;
-using GildeApp.Api.Dtos.Players;
+using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Dtos.RuleSets;
-using GildeApp.Api.Dtos.Tourneys;
 using GildeApp.Api.Dtos.Weapons;
 
 namespace GildeApp.Api.Extensions
@@ -14,11 +12,7 @@ namespace GildeApp.Api.Extensions
             {
                 RuleSetId = ruleSet.Id,
                 WeaponId = ruleSet.WeaponId,
-                Weapon = new WeaponDto
-                {
-                    WeaponId = ruleSet.Weapon.Id,
-                    Name = ruleSet.Weapon.Name
-                }
+                Weapon = ruleSet.Weapon.ToWeaponSummary()
             };
         }
 
@@ -36,13 +30,28 @@ namespace GildeApp.Api.Extensions
                 MaxScore = ruleSet.MaxScore,
                 Doubles = ruleSet.Doubles,
                 HasDoubles = ruleSet.HasDoubles,
+                Weapon = ruleSet.Weapon.ToWeaponSummary()
+            };
+        }
 
-                Weapon = new WeaponDto
-                {
-                    WeaponId = ruleSet.Weapon.Id,
-                    Name = ruleSet.Weapon.Name
-                }
+        public static IEnumerable<RuleSetDetailDto> ToDetailRuleSetListDto(this IEnumerable<RuleSet> ruleSets)
+        {
+            return ruleSets.Select(a => a.ToDetailRuleSetDto());
+        }
 
+        /// <summary>
+        /// Null-safe: a rule set loaded without .Include(r => r.Weapon) would otherwise
+        /// throw here rather than at the query that forgot the include.
+        /// </summary>
+        private static WeaponDto ToWeaponSummary(this Weapon? weapon)
+        {
+            if (weapon is null)
+                return new WeaponDto();
+
+            return new WeaponDto
+            {
+                WeaponId = weapon.Id,
+                Name = weapon.Name
             };
         }
     }

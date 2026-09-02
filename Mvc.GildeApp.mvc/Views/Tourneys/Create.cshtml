@@ -1,0 +1,50 @@
+@model CreateTourneyViewModel
+@{
+    ViewData["Title"] = "New tourney";
+}
+
+<div class="page-head">
+    <h1>New tourney</h1>
+    <p class="lede">Name it and pick the rules. You add the players on the next step.</p>
+</div>
+
+<form asp-action="Create" method="post" class="form form-narrow">
+    <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+    <div class="field">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="input" autocomplete="off" placeholder="Spring Tourney 2026" />
+        <span asp-validation-for="Name" class="field-error"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="RuleSetId"></label>
+        @if (Model.AvailableRuleSets.Any())
+        {
+            <select asp-for="RuleSetId" class="input">
+                <option value="">Pick a rule set…</option>
+                @foreach (var ruleSet in Model.AvailableRuleSets)
+                {
+                    <option value="@ruleSet.RuleSetId">
+                        @(ruleSet.Weapon?.Name ?? "Unknown weapon") — to @ruleSet.MaxScore
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="RuleSetId" class="field-error"></span>
+        }
+        else
+        {
+            <p class="alert alert-error">
+                There are no rule sets yet, so a tourney cannot be created. Add one through the API first
+                (<code>POST /api/ruleset</code>), then come back.
+            </p>
+        }
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary" disabled="@(!Model.AvailableRuleSets.Any())">
+            Create and add players
+        </button>
+        <a class="btn btn-ghost" asp-controller="Home" asp-action="Index">Cancel</a>
+    </div>
+</form>

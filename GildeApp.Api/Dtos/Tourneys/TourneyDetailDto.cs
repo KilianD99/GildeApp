@@ -1,5 +1,6 @@
-﻿using GildeApp.Api.Dtos.Matches;
-using GildeApp.Api.Dtos.Players;
+using System;
+using System.Collections.Generic;
+using GildeApp.Api.Dtos.Entries;
 using GildeApp.Api.Dtos.RuleSets;
 
 namespace GildeApp.Api.Dtos.Tourneys
@@ -7,8 +8,7 @@ namespace GildeApp.Api.Dtos.Tourneys
     public class TourneyDetailDto : TourneyDto
     {
         public Guid RuleSetId { get; set; }
-        public RulesetDto RuleSet { get; set; } = null!;
-        public IEnumerable<PlayerDto> Players { get; set; } = new List<PlayerDto>();
-        public IEnumerable<MatchDto> Matches { get; set; } = new List<MatchDto>();
+        public RuleSetDetailDto? RuleSet { get; set; }
+        public IEnumerable<TourneyEntryDto> Entries { get; set; } = new List<TourneyEntryDto>();
     }
 }

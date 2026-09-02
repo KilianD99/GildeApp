@@ -1,8 +1,8 @@
-﻿using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
 using GildeApp.Api.Dtos.Matches;
 using GildeApp.Api.Extensions;
+using GildeApp.Api.Hubs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GildeApp.Api.Controllers
@@ -12,10 +12,12 @@ namespace GildeApp.Api.Controllers
     public class MatchController : ControllerBase
     {
         protected readonly IMatchService _matchService;
+        private readonly BoardBroadcaster _broadcaster;
 
-        public MatchController(IMatchService matchService)
+        public MatchController(IMatchService matchService, BoardBroadcaster broadcaster)
         {
             _matchService = matchService;
+            _broadcaster = broadcaster;
         }
 
         [HttpGet]
@@ -26,7 +28,20 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result.Errors);
 
-            var dtos = result.Data.ToMatchDtoList();
+            var dtos = result.Data.ToMatchListDto();
+            return Ok(new ResultModel<List<MatchDto>> { Data = dtos.ToList() });
+        }
+
+        /// <summary>The judge's match list for one tourney, in running order.</summary>
+        [HttpGet("tourney/{tourneyId}")]
+        public async Task<IActionResult> GetForTourney(Guid tourneyId)
+        {
+            var result = await _matchService.ListForTourneyAsync(tourneyId);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Errors);
+
+            var dtos = result.Data.ToMatchListDto();
             return Ok(new ResultModel<List<MatchDto>> { Data = dtos.ToList() });
         }
 
@@ -38,99 +53,61 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
 
-            var dto = result.Data.ToDetailMatchDto();
-            return Ok(new ResultModel<MatchDetailDto> { Data = dto });
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add(MatchCreateOrUpdateDto matchDto)
+        /// <summary>
+        /// What the mobile app posts after each touch, or once at the end of the bout.
+        /// Send Finish = false for a live score, true to lock the result in.
+        /// </summary>
+        [HttpPut("{id}/score")]
+        public async Task<IActionResult> SubmitScore(Guid id, MatchScoreDto scoreDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var match = new Match
-            {
-                FirstPlayerId = matchDto.FirstPlayerId,
-                SecondPlayerId = matchDto.SecondPlayerId,
-                TourneyId = matchDto.TourneyId,
-                FirstPlayerScore = matchDto.FirstPlayerScore,
-                SecondPlayerScore = matchDto.SecondPlayerScore,
-            };
+            var result = await _matchService.SubmitScoreAsync(
+                id, scoreDto.FirstScore, scoreDto.SecondScore, scoreDto.Finish);
 
-            var result = await _matchService.AddAsync(match);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-            if (result.IsSuccess)
-            {
-                var createdMatch = await _matchService.GetByIdAsync(match.Id);
+            // Everyone watching this tourney's board gets the new standings immediately.
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
 
-                if (createdMatch.IsSuccess)
-                {
-                    var dto = createdMatch.Data.ToDetailMatchDto();
-                    return CreatedAtAction(nameof(GetById), new { id =  match.Id }, new ResultModel<MatchDetailDto> { Data = dto });
-                }
-            }
-
-            return BadRequest(result.Errors);
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, MatchCreateOrUpdateDto playlistDto)
+        [HttpPost("{id}/reopen")]
+        public async Task<IActionResult> Reopen(Guid id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var result = await _matchService.ReopenAsync(id);
 
-            if (await _matchService.DoesMatchIdExistsAsync(id) == false)
-                return NotFound(new { message = $"No playlist with id '{id}' found" });
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-            var existingMatchResult = await _matchService.GetByIdAsync(id);
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
 
-            if (!existingMatchResult.IsSuccess)
-                return BadRequest(existingMatchResult.Errors);
-
-            var existingMatch = existingMatchResult.Data;
-            existingMatch.Id = id;
-            existingMatch.FirstPlayerId = playlistDto.FirstPlayerId;
-            existingMatch.FirstPlayerScore = playlistDto.FirstPlayerScore;
-            existingMatch.SecondPlayerId = playlistDto.SecondPlayerId;
-            existingMatch.SecondPlayerScore = playlistDto.SecondPlayerScore;
-            existingMatch.TourneyId = playlistDto.TourneyId;
-
-            var result = await _matchService.UpdateAsync(existingMatch);
-
-            if (result.IsSuccess)
-            {
-                var updatedPlaylist = await _matchService.GetByIdAsync(id);
-
-                if (updatedPlaylist.IsSuccess)
-                {
-                    var dto = updatedPlaylist.Data.ToDetailMatchDto();
-                    return Ok(new ResultModel<MatchDetailDto> { Data = dto });
-                }
-            }
-
-            return BadRequest(result.Errors);
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (await _matchService.DoesMatchIdExistsAsync(id) == false)
+            var existing = await _matchService.GetByIdAsync(id);
+
+            if (!existing.IsSuccess)
                 return NotFound(new { message = $"No match with an id of {id}" });
 
-            var existingMatch = await _matchService.GetByIdAsync(id);
+            var tourneyId = existing.Data.TourneyId;
+            var result = await _matchService.DeleteAsync(existing.Data);
 
-            if (!existingMatch.IsSuccess)
-                return BadRequest(existingMatch.Errors);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-        
+            await _broadcaster.BroadcastAsync(tourneyId);
 
-            var result = await _matchService.DeleteAsync(existingMatch.Data);
-
-            if (result.IsSuccess)
-                return Ok(new { message = $"Playlist {existingMatch.Data.Id} deleted successfully" });
-
-            return BadRequest(result.Errors);
+            return Ok(new { message = $"Match {existing.Data.Id} deleted successfully" });
         }
-
     }
 }

@@ -1,0 +1,122 @@
+@model BoardModel
+@inject ApiEndpoints Api
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="page-head board-head">
+    <div>
+        <div class="crumbs">
+            <a asp-controller="Home" asp-action="Index">Tourneys</a>
+            <span>/</span>
+            <span>@Model.Status</span>
+        </div>
+        <h1>@Model.Name</h1>
+        <p class="lede" id="board-summary">
+            @Model.PlayerCount players · @Model.MatchesFinished of @Model.MatchesTotal matches finished
+            @if (!string.IsNullOrEmpty(Model.WeaponName))
+            {
+                <text> · @Model.WeaponName to @Model.MaxScore</text>
+            }
+        </p>
+    </div>
+
+    <div class="board-actions">
+        <span class="conn" id="conn" data-state="connecting">
+            <span class="conn-dot"></span>
+            <span class="conn-label">Connecting…</span>
+        </span>
+
+        @if (Model.Status == "Running")
+        {
+            <form asp-action="Finish" method="post">
+                <input type="hidden" name="id" value="@Model.TourneyId" />
+                <button type="submit" class="btn">Finish tourney</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="board-scroll">
+    <table class="board" id="board">
+        <thead>
+            <tr>
+                <th class="col-pos">#</th>
+                <th class="col-name">Name</th>
+                @foreach (var row in Model.Rows)
+                {
+                    <th class="col-cell">@row.Position</th>
+                }
+                <th class="col-stat">Total</th>
+                <th class="col-stat">Place</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr data-position="@row.Position">
+                    <td class="col-pos">@row.Position</td>
+                    <td class="col-name">@row.Name</td>
+
+                    @foreach (var cell in row.Cells)
+                    {
+                        if (cell.IsSelf)
+                        {
+                            <td class="cell cell-self"></td>
+                        }
+                        else
+                        {
+                            <td class="cell cell-@cell.Status.ToLowerInvariant()"
+                                data-cell="@row.Position-@cell.OpponentPosition">
+                                @(cell.Score.HasValue ? cell.Score.Value.ToString() : "")
+                            </td>
+                        }
+                    }
+
+                    <td class="col-stat total" data-total="@row.Position">@row.TotalScore</td>
+                    <td class="col-stat place" data-place="@row.Position">@row.Placement</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<p class="board-note">
+    Each match appears twice — once on each fencer's row. Both squares are the same
+    result, read from opposite sides.
+</p>
+
+<section class="group">
+    <h2 class="group-title">Matches</h2>
+    <ol class="match-list" id="match-list">
+        @foreach (var match in Model.Matches)
+        {
+            <li class="match match-@match.Status.ToLowerInvariant()" data-match="@match.MatchId">
+                <span class="match-order">@match.Order</span>
+                <span class="match-side">
+                    <span class="match-pos">@match.FirstPosition</span>
+                    @match.FirstName
+                </span>
+                <span class="match-score">@match.FirstScore<span class="match-dash">–</span>@match.SecondScore</span>
+                <span class="match-side match-side-right">
+                    @match.SecondName
+                    <span class="match-pos">@match.SecondPosition</span>
+                </span>
+                <span class="match-status">@match.Status</span>
+            </li>
+        }
+    </ol>
+</section>
+
+@section Scripts {
+    @* SignalR JS client, matched to the .NET 10 server. Swap for a LibMan-installed
+       copy under wwwroot/lib if you would rather not depend on a CDN. *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/10.0.11/signalr.min.js"></script>
+    <script>
+        window.gildeBoard = {
+            tourneyId: "@Model.TourneyId",
+            hubUrl: "@Api.BoardHubUrl"
+        };
+    </script>
+    <script src="~/js/board.js" asp-append-version="true"></script>
+}

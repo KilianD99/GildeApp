@@ -1,0 +1,119 @@
+@model EntriesViewModel
+@{
+    ViewData["Title"] = Model.Tourney.Name;
+    var entries = Model.Tourney.Entries.OrderBy(e => e.Position).ToList();
+    var boutCount = entries.Count < 2 ? 0 : entries.Count * (entries.Count - 1) / 2;
+}
+
+<div class="page-head">
+    <div class="crumbs">
+        <a asp-controller="Home" asp-action="Index">Tourneys</a>
+        <span>/</span>
+        <span>Setup</span>
+    </div>
+    <h1>@Model.Tourney.Name</h1>
+    <p class="lede">
+        Add the players and set their order. Nothing is locked until you start the tourney —
+        after that the line-up is fixed.
+    </p>
+</div>
+
+<div class="split">
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Line-up</h2>
+            <span class="muted mono">@entries.Count entered</span>
+        </div>
+
+        @if (!entries.Any())
+        {
+            <p class="empty-inline">Nobody entered yet. Add players from the right.</p>
+        }
+        else
+        {
+            <ol class="entry-list">
+                @foreach (var entry in entries)
+                {
+                    <li class="entry">
+                        <span class="entry-pos">@entry.Position</span>
+                        <span class="entry-name">@entry.Name</span>
+                        <form asp-action="RemoveEntry" method="post" class="inline-form">
+                            <input type="hidden" name="id" value="@Model.Tourney.TourneyId" />
+                            <input type="hidden" name="entryId" value="@entry.EntryId" />
+                            <button type="submit" class="btn-icon" title="Remove @entry.Name" aria-label="Remove @entry.Name">&times;</button>
+                        </form>
+                    </li>
+                }
+            </ol>
+        }
+
+        <div class="start-block">
+            @if (boutCount > 0)
+            {
+                <p class="muted">
+                    Starting will generate <strong>@boutCount</strong> match@(boutCount == 1 ? "" : "es") —
+                    everyone meets everyone once.
+                </p>
+            }
+            else
+            {
+                <p class="muted">At least two players are needed before the tourney can start.</p>
+            }
+
+            <form asp-action="Start" method="post">
+                <input type="hidden" name="id" value="@Model.Tourney.TourneyId" />
+                <button type="submit" class="btn btn-primary btn-lg" disabled="@(!Model.CanStart)">
+                    Start tourney
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Add a player</h2>
+        </div>
+
+        <form asp-action="AddNewPlayer" method="post" class="form">
+            <input type="hidden" name="id" value="@Model.Tourney.TourneyId" />
+            <div class="field-row">
+                <div class="field">
+                    <label for="newFirstName">First name</label>
+                    <input id="newFirstName" name="newFirstName" class="input" autocomplete="off" />
+                </div>
+                <div class="field">
+                    <label for="newLastName">Last name</label>
+                    <input id="newLastName" name="newLastName" class="input" autocomplete="off" />
+                </div>
+            </div>
+            <button type="submit" class="btn">Add new player</button>
+        </form>
+
+        <hr class="divider" />
+
+        <div class="panel-head">
+            <h3>Or pick someone already on file</h3>
+        </div>
+
+        @if (!Model.AvailablePlayers.Any())
+        {
+            <p class="empty-inline">Everyone on file is already entered.</p>
+        }
+        else
+        {
+            <ul class="player-list">
+                @foreach (var player in Model.AvailablePlayers)
+                {
+                    <li>
+                        <span>@player.FullName</span>
+                        <form asp-action="AddExistingPlayer" method="post" class="inline-form">
+                            <input type="hidden" name="id" value="@Model.Tourney.TourneyId" />
+                            <input type="hidden" name="playerId" value="@player.PlayerId" />
+                            <button type="submit" class="btn btn-sm">Enter</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

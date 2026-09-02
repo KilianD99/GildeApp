@@ -1,10 +1,15 @@
-﻿namespace GildeApp.Api.Dtos.Players
+using System.ComponentModel.DataAnnotations;
+
+namespace GildeApp.Api.Dtos.Players
 {
     public class PlayerCreateOrUpdateDto
     {
-        public Guid? PlayerId { get; set; }
-        public Guid TourneyId { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string FirstName { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
         public string LastName { get; set; } = string.Empty;
     }
 }

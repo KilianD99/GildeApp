@@ -1,7 +1,5 @@
-﻿using GildeApp.Api.Core.Entities;
+using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Dtos.Matches;
-using GildeApp.Api.Dtos.Players;
-using GildeApp.Api.Dtos.Tourneys;
 
 namespace GildeApp.Api.Extensions
 {
@@ -12,13 +10,27 @@ namespace GildeApp.Api.Extensions
             return new MatchDto
             {
                 MatchId = match.Id,
-                
+                TourneyId = match.TourneyId,
+                Order = match.Order,
+                Status = match.Status.ToString(),
+
+                FirstEntryId = match.FirstEntryId,
+                FirstPosition = match.FirstEntry?.Position ?? 0,
+                FirstName = match.FirstEntry?.Player?.FullName ?? string.Empty,
+                FirstScore = match.FirstScore,
+
+                SecondEntryId = match.SecondEntryId,
+                SecondPosition = match.SecondEntry?.Position ?? 0,
+                SecondName = match.SecondEntry?.Player?.FullName ?? string.Empty,
+                SecondScore = match.SecondScore,
+
+                UpdatedAt = match.UpdatedAt
             };
         }
 
-        public static IEnumerable<MatchDto> ToMatchDtoList(this IEnumerable<Match> matches)
+        public static IEnumerable<MatchDto> ToMatchListDto(this IEnumerable<Match> matches)
         {
-            return matches.Select(a => a.ToMatchDto());
+            return matches.Select(m => m.ToMatchDto());
         }
 
         public static MatchDetailDto ToDetailMatchDto(this Match match)
@@ -26,30 +38,24 @@ namespace GildeApp.Api.Extensions
             return new MatchDetailDto
             {
                 MatchId = match.Id,
-                FirstPlayerId = match.FirstPlayerId,
-                SecondPlayerId = match.SecondPlayerId,
-                FirstPlayerScore = match.FirstPlayerScore,
-                SecondPlayerScore = match.SecondPlayerScore,
                 TourneyId = match.TourneyId,
+                Order = match.Order,
+                Status = match.Status.ToString(),
 
-                FirstPlayer = new PlayerDto
-                {
-                    PlayerId = match.FirstPlayer.Id,
-                    FirstName = match.FirstPlayer.FirstName,
-                    LastName = match.FirstPlayer.LastName
-                },
-                SecondPlayer = new PlayerDto
-                {
-                    PlayerId = match.SecondPlayer.Id,
-                    FirstName = match.SecondPlayer.FirstName,
-                    LastName = match.SecondPlayer.LastName
-                },
-                Tourney = new TourneyDto
-                {
-                    TourneyId = match.Tourney.Id,
-                    Name = match.Tourney.Name
-                }
+                FirstEntryId = match.FirstEntryId,
+                FirstPosition = match.FirstEntry?.Position ?? 0,
+                FirstName = match.FirstEntry?.Player?.FullName ?? string.Empty,
+                FirstScore = match.FirstScore,
 
+                SecondEntryId = match.SecondEntryId,
+                SecondPosition = match.SecondEntry?.Position ?? 0,
+                SecondName = match.SecondEntry?.Player?.FullName ?? string.Empty,
+                SecondScore = match.SecondScore,
+
+                UpdatedAt = match.UpdatedAt,
+
+                TourneyName = match.Tourney?.Name ?? string.Empty,
+                MaxScore = match.Tourney?.RuleSet?.MaxScore ?? 0
             };
         }
     }

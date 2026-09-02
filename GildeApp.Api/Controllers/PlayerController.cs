@@ -1,8 +1,6 @@
-﻿using GildeApp.Api.Core.Entities;
-using GildeApp.Api.Core.Services;
+using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
-using GildeApp.Api.Dtos.Matches;
 using GildeApp.Api.Dtos.Players;
 using GildeApp.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +18,16 @@ namespace GildeApp.Api.Controllers
             _playerService = playerService;
         }
 
+        /// <summary>
+        /// Every player on file. Pass ?search= to filter, which is what the
+        /// "add a player" box on the entry screen uses.
+        /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? search)
         {
-            var result = await _playerService.ListAllAsync();
+            var result = string.IsNullOrWhiteSpace(search)
+                ? await _playerService.ListAllAsync()
+                : await _playerService.SearchAsync(search);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Errors);
@@ -40,8 +44,7 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return NotFound(result.Errors);
 
-            var dto = result.Data.ToDetailPlayerDto();
-            return Ok(new ResultModel<PlayerDetailDto> { Data = dto });
+            return Ok(new ResultModel<PlayerDetailDto> { Data = result.Data.ToDetailPlayerDto() });
         }
 
         [HttpPost]
@@ -52,82 +55,57 @@ namespace GildeApp.Api.Controllers
 
             var player = new Player
             {
+                Id = Guid.NewGuid(),
                 FirstName = playerDto.FirstName,
-                LastName = playerDto.LastName,
-                TourneyId = playerDto.TourneyId
+                LastName = playerDto.LastName
             };
 
             var result = await _playerService.AddAsync(player);
 
-            if (result.IsSuccess)
-            {
-                var createdPlayer = await _playerService.GetByIdAsync(player.Id);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-                if (createdPlayer.IsSuccess)
-                {
-                    var dto = createdPlayer.Data.ToDetailPlayerDto();
-                    return CreatedAtAction(nameof(GetById), new { id = player.Id }, new ResultModel<PlayerDetailDto> { Data = dto });
-                }
-            }
-
-            return BadRequest(result.Errors);
+            return CreatedAtAction(nameof(GetById), new { id = player.Id },
+                new ResultModel<PlayerDto> { Data = result.Data.ToPlayerDto() });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, PlayerCreateOrUpdateDto playerListDto)
+        public async Task<IActionResult> Update(Guid id, PlayerCreateOrUpdateDto playerDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _playerService.DoesPlayerIdExistsAsync(id) == false)
-                return NotFound(new { message = $"No playlist with id '{id}' found" });
+            var existingResult = await _playerService.GetByIdAsync(id);
 
-            var existingPlayerResult = await _playerService.GetByIdAsync(id);
+            if (!existingResult.IsSuccess)
+                return NotFound(new { message = $"No player with id '{id}' found" });
 
-            if (!existingPlayerResult.IsSuccess)
-                return BadRequest(existingPlayerResult.Errors);
+            var existing = existingResult.Data;
+            existing.FirstName = playerDto.FirstName;
+            existing.LastName = playerDto.LastName;
 
-            var existingPlayer = existingPlayerResult.Data;
-            existingPlayer.Id = id;
-            existingPlayer.FirstName = playerListDto.FirstName;
-            existingPlayer.LastName = playerListDto.LastName;
-            existingPlayer.TourneyId = playerListDto.TourneyId;
+            var result = await _playerService.UpdateAsync(existing);
 
-            var result = await _playerService.UpdateAsync(existingPlayer);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-            if (result.IsSuccess)
-            {
-                var updatedPlaylist = await _playerService.GetByIdAsync(id);
-
-                if (updatedPlaylist.IsSuccess)
-                {
-                    var dto = updatedPlaylist.Data.ToDetailPlayerDto();
-                    return Ok(new ResultModel<PlayerDetailDto> { Data = dto });
-                }
-            }
-
-            return BadRequest(result.Errors);
+            return Ok(new ResultModel<PlayerDto> { Data = result.Data.ToPlayerDto() });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (await _playerService.DoesPlayerIdExistsAsync(id) == false)
+            var existing = await _playerService.GetByIdAsync(id);
+
+            if (!existing.IsSuccess)
                 return NotFound(new { message = $"No player with an id of {id}" });
 
-            var existingMatch = await _playerService.GetByIdAsync(id);
+            var result = await _playerService.DeleteAsync(existing.Data);
 
-            if (!existingMatch.IsSuccess)
-                return BadRequest(existingMatch.Errors);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-
-
-            var result = await _playerService.DeleteAsync(existingMatch.Data);
-
-            if (result.IsSuccess)
-                return Ok(new { message = $"Player {existingMatch.Data.Id} deleted successfully" });
-
-            return BadRequest(result.Errors);
+            return Ok(new { message = $"Player {existing.Data.Id} deleted successfully" });
         }
     }
 }

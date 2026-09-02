@@ -1,8 +1,6 @@
-﻿using GildeApp.Api.Core.Entities;
-using GildeApp.Api.Core.Services;
+using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
-using GildeApp.Api.Dtos.Players;
 using GildeApp.Api.Dtos.RuleSets;
 using GildeApp.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +18,10 @@ namespace GildeApp.Api.Controllers
             _ruleSetService = ruleSetService;
         }
 
+        /// <summary>
+        /// Returns the full rule set, not the summary: the tourney create screen needs
+        /// MaxScore to label the options.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -28,8 +30,8 @@ namespace GildeApp.Api.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result.Errors);
 
-            var dtos = result.Data.ToRuleSetListDto();
-            return Ok(new ResultModel<List<RulesetDto>> { Data = dtos.ToList() });
+            var dtos = result.Data.ToDetailRuleSetListDto();
+            return Ok(new ResultModel<List<RuleSetDetailDto>> { Data = dtos.ToList() });
         }
 
         [HttpGet("{id}")]
@@ -52,31 +54,32 @@ namespace GildeApp.Api.Controllers
 
             var ruleSet = new RuleSet
             {
-                Id = ruleSetDto.RuleSetId,
+                // The server owns the key. Taking it from the request body meant an
+                // empty Guid whenever the caller left it out.
+                Id = Guid.NewGuid(),
                 MaxScore = ruleSetDto.MaxScore,
                 Doubles = ruleSetDto.Doubles,
                 HasDoubles = ruleSetDto.HasDoubles,
-                WeaponId = ruleSetDto.WeaponId,
+                WeaponId = ruleSetDto.WeaponId
             };
 
             var result = await _ruleSetService.AddAsync(ruleSet);
 
-            if (result.IsSuccess)
-            {
-                var createdPlayer = await _ruleSetService.GetByIdAsync(ruleSet.Id);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-                if (createdPlayer.IsSuccess)
-                {
-                    var dto = createdPlayer.Data.ToDetailRuleSetDto();
-                    return CreatedAtAction(nameof(GetById), new { id = ruleSet.Id }, new ResultModel<RuleSetDetailDto> { Data = dto });
-                }
-            }
+            var created = await _ruleSetService.GetByIdAsync(ruleSet.Id);
 
-            return BadRequest(result.Errors);
+            if (!created.IsSuccess)
+                return BadRequest(created.Errors);
+
+            var dto = created.Data.ToDetailRuleSetDto();
+            return CreatedAtAction(nameof(GetById), new { id = ruleSet.Id },
+                new ResultModel<RuleSetDetailDto> { Data = dto });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, RuleSetCreateOrUpdateDto ruleSetListDto)
+        public async Task<IActionResult> Update(Guid id, RuleSetCreateOrUpdateDto ruleSetDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -84,54 +87,40 @@ namespace GildeApp.Api.Controllers
             if (await _ruleSetService.DoesRuleSetIdExistsAsync(id) == false)
                 return NotFound(new { message = $"No ruleset with id '{id}' found" });
 
-            var existingRuleSetResult = await _ruleSetService.GetByIdAsync(id);
+            var existingResult = await _ruleSetService.GetByIdAsync(id);
 
-            if (!existingRuleSetResult.IsSuccess)
-                return BadRequest(existingRuleSetResult.Errors);
+            if (!existingResult.IsSuccess)
+                return BadRequest(existingResult.Errors);
 
-            var existingRuleSet = existingRuleSetResult.Data;
-            existingRuleSet.Id = id;
-            existingRuleSet.WeaponId = ruleSetListDto.WeaponId;
-            existingRuleSet.Doubles = ruleSetListDto.Doubles;
-            existingRuleSet.HasDoubles = ruleSetListDto.HasDoubles;
-            existingRuleSet.MaxScore = ruleSetListDto.MaxScore;
-            
+            var existing = existingResult.Data;
+            existing.WeaponId = ruleSetDto.WeaponId;
+            existing.Doubles = ruleSetDto.Doubles;
+            existing.HasDoubles = ruleSetDto.HasDoubles;
+            existing.MaxScore = ruleSetDto.MaxScore;
 
-            var result = await _ruleSetService.UpdateAsync(existingRuleSet);
+            var result = await _ruleSetService.UpdateAsync(existing);
 
-            if (result.IsSuccess)
-            {
-                var updatedRuleSet = await _ruleSetService.GetByIdAsync(id);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-                if (updatedRuleSet.IsSuccess)
-                {
-                    var dto = updatedRuleSet.Data.ToDetailRuleSetDto();
-                    return Ok(new ResultModel<RuleSetDetailDto> { Data = dto });
-                }
-            }
-
-            return BadRequest(result.Errors);
+            var updated = await _ruleSetService.GetByIdAsync(id);
+            return Ok(new ResultModel<RuleSetDetailDto> { Data = updated.Data.ToDetailRuleSetDto() });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (await _ruleSetService.DoesRuleSetIdExistsAsync(id) == false)
+            var existing = await _ruleSetService.GetByIdAsync(id);
+
+            if (!existing.IsSuccess)
                 return NotFound(new { message = $"No ruleSet with an id of {id}" });
 
-            var existingRuleSet = await _ruleSetService.GetByIdAsync(id);
+            var result = await _ruleSetService.DeleteAsync(existing.Data);
 
-            if (!existingRuleSet.IsSuccess)
-                return BadRequest(existingRuleSet.Errors);
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
 
-
-
-            var result = await _ruleSetService.DeleteAsync(existingRuleSet.Data);
-
-            if (result.IsSuccess)
-                return Ok(new { message = $"RuleSet {existingRuleSet.Data.Id} deleted successfully" });
-
-            return BadRequest(result.Errors);
+            return Ok(new { message = $"RuleSet {existing.Data.Id} deleted successfully" });
         }
     }
 }
