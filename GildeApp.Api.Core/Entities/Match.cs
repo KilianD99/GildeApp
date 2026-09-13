@@ -18,7 +18,7 @@ namespace GildeApp.Api.Core.Entities
         public int FirstScore { get; set; }
         public int SecondScore { get; set; }
 
-        public Matchstatus Status { get; set; } = Matchstatus.Scheduled;
+        public MatchStatus Status { get; set; } = MatchStatus.Scheduled;
    
         public int Order { get; set; }
 
