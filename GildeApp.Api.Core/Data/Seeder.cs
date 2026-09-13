@@ -6,6 +6,11 @@ namespace GildeApp.Api.Core.Data
 {
     public class Seeder
     {
+        // Must be a fixed literal, never DateTime.UtcNow: HasData is baked into the
+        // migration, so a moving value makes EF see a model change on every build.
+        private static readonly DateTime SeedDate =
+            new DateTime(2026, 3, 14, 9, 0, 0, DateTimeKind.Utc);
+
         public static void Seed(ModelBuilder modelBuilder)
         {
             var foilId = new Guid("44444444-4444-4444-4444-444444444441");
@@ -39,7 +44,7 @@ namespace GildeApp.Api.Core.Data
                     Name = "Spring Tourney 2026",
                     RuleSetId = standardRulesId,
                     Status = TourneyStatus.Running,
-                    //CreatedAt = SeedDate
+                    CreatedAt = SeedDate
                 }
             );
 
@@ -78,7 +83,7 @@ namespace GildeApp.Api.Core.Data
                     SecondScore = 3,
                     Status = MatchStatus.Finished,
                     Order = 1,
-                    //UpdatedAt = (DateTime?)SeedDate
+                    UpdatedAt = (DateTime?)SeedDate
                 },
                 new
                 {
@@ -90,7 +95,7 @@ namespace GildeApp.Api.Core.Data
                     SecondScore = 5,
                     Status = MatchStatus.Finished,
                     Order = 2,
-                    //UpdatedAt = (DateTime?)SeedDate
+                    UpdatedAt = (DateTime?)SeedDate
                 },
                 new
                 {
@@ -102,7 +107,7 @@ namespace GildeApp.Api.Core.Data
                     SecondScore = 4,
                     Status = MatchStatus.InProgress,
                     Order = 3,
-                    //UpdatedAt = (DateTime?)SeedDate
+                    UpdatedAt = (DateTime?)SeedDate
                 },
                 new
                 {

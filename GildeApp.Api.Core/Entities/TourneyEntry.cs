@@ -7,10 +7,10 @@ namespace GildeApp.Api.Core.Entities
     public class TourneyEntry : BaseEntity
     {
         public Guid TourneyId { get; set; }
-        public Tourney Tourney { get; set; } = null;
+        public Tourney Tourney { get; set; } = null!;
 
         public Guid PlayerId { get; set; }
-        public Player Player { get; set; } = null;
+        public Player Player { get; set; } = null!;
 
         public int Position { get; set; }
 
