@@ -15,5 +15,7 @@ namespace GildeApp.Api.Core.Services.Interfaces
         Task<ResultModel<Match>> UpdateAsync(Match entity);
         Task<ResultModel<Match>> AddAsync(Match entity);
         Task<ResultModel<Match>> DeleteAsync(Match entity);
+        Task<ResultModel<Match>> SubmitScoreAsync(Guid matchId, int firstScore, int secondScore, bool finish);
+        Task<ResultModel<Match>> ReopenAsync(Guid matchId);
     }
 }
