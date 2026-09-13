@@ -57,7 +57,7 @@ namespace GildeApp.Api.Controllers
         }
 
         [HttpPut("{id}/score")]
-        public async Task<IActionResult> SubmitScore(Guid id, MatchScoreDto scoreDto)
+        public async Task<IActionResult> SubmitScore(Guid id, MatchCreateOrUpdateDto scoreDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
