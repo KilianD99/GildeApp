@@ -40,7 +40,6 @@ namespace GildeApp.Api.Extensions
         {
             return ruleSets.Select(a => a.ToDetailRuleSetDto());
         }
-
         private static WeaponDto ToWeaponSummary(this Weapon? weapon)
         {
             if (weapon is null)
