@@ -107,4 +107,5 @@ namespace GildeApp.Api.Extensions
                 }).ToList()
             };
         }
+    }
 }
