@@ -10,6 +10,7 @@ namespace GildeApp.Api.Core.Services.Interfaces
     {
             IQueryable<Player> GetAllPlayers();
             Task<ResultModel<IEnumerable<Player>>> ListAllAsync();
+            Task<ResultModel<IEnumerable<Player>>> SearchAsync(string? term);
             Task<ResultModel<Player>> GetByIdAsync(Guid id);
             Task<bool> DoesPlayerIdExistsAsync(Guid id);
             Task<ResultModel<Player>> UpdateAsync(Player entity);

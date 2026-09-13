@@ -1,14 +1,15 @@
-﻿using GildeApp.Api.Core.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using GildeApp.Api.Core.Entities;
 
 namespace GildeApp.Api.Dtos.Matches 
 {
     public class MatchCreateOrUpdateDto
     {
-        public Guid? MatchId { get; set; } 
-        public int FirstPlayerScore { get; set; }
-        public int SecondPlayerScore { get; set; }
-        public Guid FirstPlayerId { get; set; }
-        public Guid SecondPlayerId { get; set; }
-        public Guid TourneyId { get; set; }
+        [Range(0, 999)]
+        public int FirstScore { get; set; }
+
+        [Range(0, 999)]
+        public int SecondScore { get; set; }
+        public bool Finish { get; set; }
     }
 }

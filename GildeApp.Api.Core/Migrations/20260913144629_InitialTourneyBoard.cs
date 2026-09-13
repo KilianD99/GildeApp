@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GildeApp.Api.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class AddWeaponToRuleSet : Migration
+    public partial class InitialTourneyBoard : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,6 +52,19 @@ namespace GildeApp.Api.Core.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Players",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Players", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -198,7 +211,9 @@ namespace GildeApp.Api.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RuleSetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -209,61 +224,81 @@ namespace GildeApp.Api.Core.Migrations
                         column: x => x.RuleSetId,
                         principalTable: "RuleSets",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Players",
+                name: "TourneyEntries",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TourneyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TourneyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Players", x => x.Id);
+                    table.PrimaryKey("PK_TourneyEntries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Players_Tourneys_TourneyId",
-                        column: x => x.TourneyId,
-                        principalTable: "Tourneys",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Match",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstPlayerScore = table.Column<int>(type: "int", nullable: false),
-                    SecondPlayerScore = table.Column<int>(type: "int", nullable: false),
-                    FirstPlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SecondPlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TourneyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Match", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Match_Players_FirstPlayerId",
-                        column: x => x.FirstPlayerId,
+                        name: "FK_TourneyEntries_Players_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Match_Players_SecondPlayerId",
-                        column: x => x.SecondPlayerId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Match_Tourneys_TourneyId",
+                        name: "FK_TourneyEntries_Tourneys_TourneyId",
                         column: x => x.TourneyId,
                         principalTable: "Tourneys",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Matches",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TourneyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SecondEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstScore = table.Column<int>(type: "int", nullable: false),
+                    SecondScore = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Matches", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Matches_TourneyEntries_FirstEntryId",
+                        column: x => x.FirstEntryId,
+                        principalTable: "TourneyEntries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Matches_TourneyEntries_SecondEntryId",
+                        column: x => x.SecondEntryId,
+                        principalTable: "TourneyEntries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Matches_Tourneys_TourneyId",
+                        column: x => x.TourneyId,
+                        principalTable: "Tourneys",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Players",
+                columns: new[] { "Id", "FirstName", "LastName" },
+                values: new object[,]
+                {
+                    { new Guid("33333333-3333-3333-3333-333333333331"), "Jan", "Peeters" },
+                    { new Guid("33333333-3333-3333-3333-333333333332"), "Marie", "Janssens" },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "Lars", "De Vos" },
+                    { new Guid("33333333-3333-3333-3333-333333333334"), "Sofie", "Maes" }
                 });
 
             migrationBuilder.InsertData(
@@ -279,31 +314,35 @@ namespace GildeApp.Api.Core.Migrations
             migrationBuilder.InsertData(
                 table: "RuleSets",
                 columns: new[] { "Id", "Doubles", "HasDoubles", "MaxScore", "WeaponId" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), 0, false, 3, new Guid("44444444-4444-4444-4444-444444444441") });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), 0, false, 5, new Guid("44444444-4444-4444-4444-444444444441") });
 
             migrationBuilder.InsertData(
                 table: "Tourneys",
-                columns: new[] { "Id", "Name", "RuleSetId" },
-                values: new object[] { new Guid("22222222-2222-2222-2222-222222222222"), "Spring Tourney 2026", new Guid("11111111-1111-1111-1111-111111111111") });
+                columns: new[] { "Id", "CreatedAt", "Name", "RuleSetId", "Status" },
+                values: new object[] { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc), "Spring Tourney 2026", new Guid("11111111-1111-1111-1111-111111111111"), 1 });
 
             migrationBuilder.InsertData(
-                table: "Players",
-                columns: new[] { "Id", "FirstName", "LastName", "TourneyId" },
+                table: "TourneyEntries",
+                columns: new[] { "Id", "PlayerId", "Position", "TourneyId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333331"), "Jan", "Peeters", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("33333333-3333-3333-3333-333333333332"), "Marie", "Janssens", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), "Lars", "De Vos", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("33333333-3333-3333-3333-333333333334"), "Sofie", "Maes", new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("66666666-6666-6666-6666-666666666661"), new Guid("33333333-3333-3333-3333-333333333331"), 1, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("66666666-6666-6666-6666-666666666662"), new Guid("33333333-3333-3333-3333-333333333332"), 2, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("66666666-6666-6666-6666-666666666663"), new Guid("33333333-3333-3333-3333-333333333333"), 3, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("66666666-6666-6666-6666-666666666664"), new Guid("33333333-3333-3333-3333-333333333334"), 4, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
-                table: "Match",
-                columns: new[] { "Id", "FirstPlayerId", "FirstPlayerScore", "SecondPlayerId", "SecondPlayerScore", "TourneyId" },
+                table: "Matches",
+                columns: new[] { "Id", "FirstEntryId", "FirstScore", "Order", "SecondEntryId", "SecondScore", "Status", "TourneyId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("55555555-5555-5555-5555-555555555551"), new Guid("33333333-3333-3333-3333-333333333331"), 2, new Guid("33333333-3333-3333-3333-333333333332"), 1, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("55555555-5555-5555-5555-555555555552"), new Guid("33333333-3333-3333-3333-333333333333"), 2, new Guid("33333333-3333-3333-3333-333333333334"), 3, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("55555555-5555-5555-5555-555555555551"), new Guid("66666666-6666-6666-6666-666666666661"), 5, 1, new Guid("66666666-6666-6666-6666-666666666664"), 3, 2, new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("55555555-5555-5555-5555-555555555552"), new Guid("66666666-6666-6666-6666-666666666662"), 2, 2, new Guid("66666666-6666-6666-6666-666666666663"), 5, 2, new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("55555555-5555-5555-5555-555555555553"), new Guid("66666666-6666-6666-6666-666666666664"), 3, 3, new Guid("66666666-6666-6666-6666-666666666663"), 4, 1, new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("55555555-5555-5555-5555-555555555554"), new Guid("66666666-6666-6666-6666-666666666661"), 0, 4, new Guid("66666666-6666-6666-6666-666666666662"), 0, 0, new Guid("22222222-2222-2222-2222-222222222222"), null },
+                    { new Guid("55555555-5555-5555-5555-555555555555"), new Guid("66666666-6666-6666-6666-666666666662"), 0, 5, new Guid("66666666-6666-6666-6666-666666666664"), 0, 0, new Guid("22222222-2222-2222-2222-222222222222"), null },
+                    { new Guid("55555555-5555-5555-5555-555555555556"), new Guid("66666666-6666-6666-6666-666666666663"), 0, 6, new Guid("66666666-6666-6666-6666-666666666661"), 0, 0, new Guid("22222222-2222-2222-2222-222222222222"), null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -346,29 +385,41 @@ namespace GildeApp.Api.Core.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Match_FirstPlayerId",
-                table: "Match",
-                column: "FirstPlayerId");
+                name: "IX_Matches_FirstEntryId",
+                table: "Matches",
+                column: "FirstEntryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Match_SecondPlayerId",
-                table: "Match",
-                column: "SecondPlayerId");
+                name: "IX_Matches_SecondEntryId",
+                table: "Matches",
+                column: "SecondEntryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Match_TourneyId",
-                table: "Match",
-                column: "TourneyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Players_TourneyId",
-                table: "Players",
-                column: "TourneyId");
+                name: "IX_Matches_TourneyId_Order",
+                table: "Matches",
+                columns: new[] { "TourneyId", "Order" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_RuleSets_WeaponId",
                 table: "RuleSets",
                 column: "WeaponId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourneyEntries_PlayerId",
+                table: "TourneyEntries",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourneyEntries_TourneyId_PlayerId",
+                table: "TourneyEntries",
+                columns: new[] { "TourneyId", "PlayerId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourneyEntries_TourneyId_Position",
+                table: "TourneyEntries",
+                columns: new[] { "TourneyId", "Position" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tourneys_RuleSetId",
@@ -395,13 +446,16 @@ namespace GildeApp.Api.Core.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Match");
+                name: "Matches");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "TourneyEntries");
 
             migrationBuilder.DropTable(
                 name: "Players");

@@ -13,13 +13,14 @@ namespace GildeApp.Api.Extensions
             {
                 PlayerId = player.Id,
                 FirstName = player.FirstName,
-                LastName = player.LastName
+                LastName = player.LastName,
+                FullName = player.FullName
             };
         }
 
         public static IEnumerable<PlayerDto> ToPlayerListDto(this IEnumerable<Player> players)
         {
-            return players.Select(a => a.ToPlayerDto());
+            return players.Select(p => p.ToPlayerDto());
         }
 
         public static PlayerDetailDto ToDetailPlayerDto(this Player player)
@@ -29,14 +30,17 @@ namespace GildeApp.Api.Extensions
                 PlayerId = player.Id,
                 FirstName = player.FirstName,
                 LastName = player.LastName,
-                TourneyId = player.TourneyId,
-
-                Tourney = new TourneyDto
-                {
-                    TourneyId = player.Tourney.Id,
-                    Name = player.Tourney.Name
-                }
-
+                FullName = player.FullName,
+                History = (player.Entries ?? new List<TourneyEntry>())
+                    .Select(e => new PlayerHistoryDto
+                    {
+                        TourneyId = e.TourneyId,
+                        TourneyName = e.Tourney?.Name ?? string.Empty,
+                        Status = e.Tourney?.Status.ToString() ?? string.Empty,
+                        Position = e.Position
+                    })
+                    .OrderBy(h => h.TourneyName)
+                    .ToList()
             };
         }
     }

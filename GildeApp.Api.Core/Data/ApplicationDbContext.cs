@@ -12,27 +12,72 @@ namespace GildeApp.Api.Core.Data
         public DbSet<Player> Players { get; set; }
         public DbSet<RuleSet> RuleSets { get; set; }
         public DbSet<Tourney> Tourneys { get; set; }
+        public DbSet<TourneyEntry> TourneyEntries { get; set; }
         public DbSet<Weapon> Weapons { get; set; }
         public DbSet<Match> Matches { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);   
+            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Match>()
-                .HasOne(m => m.FirstPlayer)
-                .WithMany()
-                .HasForeignKey(m => m.FirstPlayerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Player>(player =>
+            {
+                player.Property(p => p.FirstName).IsRequired().HasMaxLength(100);
+                player.Property(p => p.LastName).IsRequired().HasMaxLength(100);
+            });
 
-            modelBuilder.Entity<Match>()
-                .HasOne(m => m.SecondPlayer)
-                .WithMany()
-                .HasForeignKey(m => m.SecondPlayerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Tourney>(tourney =>
+            {
+                tourney.Property(t => t.Name).IsRequired().HasMaxLength(200);
+                tourney.Property(t => t.Status).HasConversion<int>();
+
+                tourney.HasOne(t => t.RuleSet)
+                       .WithMany()
+                       .HasForeignKey(t => t.RuleSetId)
+                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<TourneyEntry>(entry =>
+            {
+                entry.HasOne(e => e.Tourney)
+                     .WithMany(t => t.Entries)
+                     .HasForeignKey(e => e.TourneyId)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                entry.HasOne(e => e.Player)
+                     .WithMany(p => p.Entries)
+                     .HasForeignKey(e => e.PlayerId)
+                     .OnDelete(DeleteBehavior.Restrict);
+                   
+                entry.HasIndex(e => new { e.TourneyId, e.Position }).IsUnique();
+                entry.HasIndex(e => new { e.TourneyId, e.PlayerId }).IsUnique();
+            });
+
+            modelBuilder.Entity<Match>(match =>
+            {
+                match.Property(m => m.Status).HasConversion<int>();
+
+                match.HasOne(m => m.Tourney)
+                     .WithMany(t => t.Matches)
+                     .HasForeignKey(m => m.TourneyId)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                match.HasOne(m => m.FirstEntry)
+                     .WithMany(e => e.MatchesAsFirst)
+                     .HasForeignKey(m => m.FirstEntryId)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                match.HasOne(m => m.SecondEntry)
+                     .WithMany(e => e.MatchesAsSecond)
+                     .HasForeignKey(m => m.SecondEntryId)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                match.HasIndex(m => new { m.TourneyId, m.Order });
+            });
 
             Seeder.Seed(modelBuilder);
         }

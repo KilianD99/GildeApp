@@ -14,11 +14,7 @@ namespace GildeApp.Api.Extensions
             {
                 RuleSetId = ruleSet.Id,
                 WeaponId = ruleSet.WeaponId,
-                Weapon = new WeaponDto
-                {
-                    WeaponId = ruleSet.Weapon.Id,
-                    Name = ruleSet.Weapon.Name
-                }
+                Weapon = ruleSet.Weapon.ToWeaponSummary()
             };
         }
 
@@ -36,13 +32,23 @@ namespace GildeApp.Api.Extensions
                 MaxScore = ruleSet.MaxScore,
                 Doubles = ruleSet.Doubles,
                 HasDoubles = ruleSet.HasDoubles,
+                Weapon = ruleSet.Weapon.ToWeaponSummary()
+            };
+        }
 
-                Weapon = new WeaponDto
-                {
-                    WeaponId = ruleSet.Weapon.Id,
-                    Name = ruleSet.Weapon.Name
-                }
+        public static IEnumerable<RuleSetDetailDto> ToDetailRuleSetListDto(this IEnumerable<RuleSet> ruleSets)
+        {
+            return ruleSets.Select(a => a.ToDetailRuleSetDto());
+        }
+        private static WeaponDto ToWeaponSummary(this Weapon? weapon)
+        {
+            if (weapon is null)
+                return new WeaponDto();
 
+            return new WeaponDto
+            {
+                WeaponId = weapon.Id,
+                Name = weapon.Name
             };
         }
     }

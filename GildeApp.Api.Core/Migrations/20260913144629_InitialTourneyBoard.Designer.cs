@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GildeApp.Api.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260624153714_AddMatchTable")]
-    partial class AddMatchTable
+    [Migration("20260913144629_InitialTourneyBoard")]
+    partial class InitialTourneyBoard
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,28 +104,37 @@ namespace GildeApp.Api.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("FirstPlayerId")
+                    b.Property<Guid>("FirstEntryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("FirstPlayerScore")
+                    b.Property<int>("FirstScore")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SecondPlayerId")
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SecondEntryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("SecondPlayerScore")
+                    b.Property<int>("SecondScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<Guid>("TourneyId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstPlayerId");
+                    b.HasIndex("FirstEntryId");
 
-                    b.HasIndex("SecondPlayerId");
+                    b.HasIndex("SecondEntryId");
 
-                    b.HasIndex("TourneyId");
+                    b.HasIndex("TourneyId", "Order");
 
                     b.ToTable("Matches");
 
@@ -133,19 +142,70 @@ namespace GildeApp.Api.Core.Migrations
                         new
                         {
                             Id = new Guid("55555555-5555-5555-5555-555555555551"),
-                            FirstPlayerId = new Guid("33333333-3333-3333-3333-333333333331"),
-                            FirstPlayerScore = 2,
-                            SecondPlayerId = new Guid("33333333-3333-3333-3333-333333333332"),
-                            SecondPlayerScore = 1,
-                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666661"),
+                            FirstScore = 5,
+                            Order = 1,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666664"),
+                            SecondScore = 3,
+                            Status = 2,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UpdatedAt = new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("55555555-5555-5555-5555-555555555552"),
-                            FirstPlayerId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            FirstPlayerScore = 2,
-                            SecondPlayerId = new Guid("33333333-3333-3333-3333-333333333334"),
-                            SecondPlayerScore = 3,
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666662"),
+                            FirstScore = 2,
+                            Order = 2,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666663"),
+                            SecondScore = 5,
+                            Status = 2,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UpdatedAt = new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555553"),
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666664"),
+                            FirstScore = 3,
+                            Order = 3,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666663"),
+                            SecondScore = 4,
+                            Status = 1,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            UpdatedAt = new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555554"),
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666661"),
+                            FirstScore = 0,
+                            Order = 4,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666662"),
+                            SecondScore = 0,
+                            Status = 0,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666662"),
+                            FirstScore = 0,
+                            Order = 5,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666664"),
+                            SecondScore = 0,
+                            Status = 0,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555556"),
+                            FirstEntryId = new Guid("66666666-6666-6666-6666-666666666663"),
+                            FirstScore = 0,
+                            Order = 6,
+                            SecondEntryId = new Guid("66666666-6666-6666-6666-666666666661"),
+                            SecondScore = 0,
+                            Status = 0,
                             TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
@@ -158,18 +218,15 @@ namespace GildeApp.Api.Core.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TourneyId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TourneyId");
 
                     b.ToTable("Players");
 
@@ -178,29 +235,25 @@ namespace GildeApp.Api.Core.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333331"),
                             FirstName = "Jan",
-                            LastName = "Peeters",
-                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                            LastName = "Peeters"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333332"),
                             FirstName = "Marie",
-                            LastName = "Janssens",
-                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                            LastName = "Janssens"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             FirstName = "Lars",
-                            LastName = "De Vos",
-                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                            LastName = "De Vos"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333334"),
                             FirstName = "Sofie",
-                            LastName = "Maes",
-                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                            LastName = "Maes"
                         });
                 });
 
@@ -234,7 +287,7 @@ namespace GildeApp.Api.Core.Migrations
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Doubles = 0,
                             HasDoubles = false,
-                            MaxScore = 3,
+                            MaxScore = 5,
                             WeaponId = new Guid("44444444-4444-4444-4444-444444444441")
                         });
                 });
@@ -245,12 +298,19 @@ namespace GildeApp.Api.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<Guid>("RuleSetId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -262,8 +322,68 @@ namespace GildeApp.Api.Core.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 3, 14, 9, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Spring Tourney 2026",
-                            RuleSetId = new Guid("11111111-1111-1111-1111-111111111111")
+                            RuleSetId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Status = 1
+                        });
+                });
+
+            modelBuilder.Entity("GildeApp.Api.Core.Entities.TourneyEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TourneyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TourneyId", "PlayerId")
+                        .IsUnique();
+
+                    b.HasIndex("TourneyId", "Position")
+                        .IsUnique();
+
+                    b.ToTable("TourneyEntries");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666661"),
+                            PlayerId = new Guid("33333333-3333-3333-3333-333333333331"),
+                            Position = 1,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666662"),
+                            PlayerId = new Guid("33333333-3333-3333-3333-333333333332"),
+                            Position = 2,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666663"),
+                            PlayerId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Position = 3,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("66666666-6666-6666-6666-666666666664"),
+                            PlayerId = new Guid("33333333-3333-3333-3333-333333333334"),
+                            Position = 4,
+                            TourneyId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
 
@@ -434,38 +554,27 @@ namespace GildeApp.Api.Core.Migrations
 
             modelBuilder.Entity("GildeApp.Api.Core.Entities.Match", b =>
                 {
-                    b.HasOne("GildeApp.Api.Core.Entities.Player", "FirstPlayer")
-                        .WithMany()
-                        .HasForeignKey("FirstPlayerId")
+                    b.HasOne("GildeApp.Api.Core.Entities.TourneyEntry", "FirstEntry")
+                        .WithMany("MatchesAsFirst")
+                        .HasForeignKey("FirstEntryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GildeApp.Api.Core.Entities.Player", "SecondPlayer")
-                        .WithMany()
-                        .HasForeignKey("SecondPlayerId")
+                    b.HasOne("GildeApp.Api.Core.Entities.TourneyEntry", "SecondEntry")
+                        .WithMany("MatchesAsSecond")
+                        .HasForeignKey("SecondEntryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GildeApp.Api.Core.Entities.Tourney", "Tourney")
                         .WithMany("Matches")
                         .HasForeignKey("TourneyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("FirstPlayer");
+                    b.Navigation("FirstEntry");
 
-                    b.Navigation("SecondPlayer");
-
-                    b.Navigation("Tourney");
-                });
-
-            modelBuilder.Entity("GildeApp.Api.Core.Entities.Player", b =>
-                {
-                    b.HasOne("GildeApp.Api.Core.Entities.Tourney", "Tourney")
-                        .WithMany("Players")
-                        .HasForeignKey("TourneyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("SecondEntry");
 
                     b.Navigation("Tourney");
                 });
@@ -486,10 +595,29 @@ namespace GildeApp.Api.Core.Migrations
                     b.HasOne("GildeApp.Api.Core.Entities.RuleSet", "RuleSet")
                         .WithMany()
                         .HasForeignKey("RuleSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("RuleSet");
+                });
+
+            modelBuilder.Entity("GildeApp.Api.Core.Entities.TourneyEntry", b =>
+                {
+                    b.HasOne("GildeApp.Api.Core.Entities.Player", "Player")
+                        .WithMany("Entries")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GildeApp.Api.Core.Entities.Tourney", "Tourney")
+                        .WithMany("Entries")
+                        .HasForeignKey("TourneyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Tourney");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -543,11 +671,23 @@ namespace GildeApp.Api.Core.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GildeApp.Api.Core.Entities.Player", b =>
+                {
+                    b.Navigation("Entries");
+                });
+
             modelBuilder.Entity("GildeApp.Api.Core.Entities.Tourney", b =>
                 {
-                    b.Navigation("Matches");
+                    b.Navigation("Entries");
 
-                    b.Navigation("Players");
+                    b.Navigation("Matches");
+                });
+
+            modelBuilder.Entity("GildeApp.Api.Core.Entities.TourneyEntry", b =>
+                {
+                    b.Navigation("MatchesAsFirst");
+
+                    b.Navigation("MatchesAsSecond");
                 });
 
             modelBuilder.Entity("GildeApp.Api.Core.Entities.Weapon", b =>
