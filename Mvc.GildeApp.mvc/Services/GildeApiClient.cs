@@ -20,8 +20,6 @@ namespace Mvc.GildeApp.mvc.Services
             _logger = logger;
         }
 
-        // ---- tourneys ------------------------------------------------------
-
         public async Task<List<TourneyModel>> GetTourneysAsync(CancellationToken ct = default)
         {
             var result = await GetAsync<List<TourneyModel>>("api/tourney", ct);
@@ -59,15 +57,11 @@ namespace Mvc.GildeApp.mvc.Services
             return SendAsync<object>(HttpMethod.Delete, $"api/tourney/{tourneyId}", null, ct);
         }
 
-        // ---- rule sets -----------------------------------------------------
-
         public async Task<List<RuleSetModel>> GetRuleSetsAsync(CancellationToken ct = default)
         {
             var result = await GetAsync<List<RuleSetModel>>("api/ruleset", ct);
             return result ?? new List<RuleSetModel>();
         }
-
-        // ---- players -------------------------------------------------------
 
         public async Task<List<PlayerModel>> GetPlayersAsync(string? search = null, CancellationToken ct = default)
         {
@@ -85,8 +79,6 @@ namespace Mvc.GildeApp.mvc.Services
                 new { firstName, lastName }, ct);
         }
 
-        // ---- entries -------------------------------------------------------
-
         public Task<ApiCallResult<TourneyEntryModel>> AddEntryAsync(Guid tourneyId, Guid playerId, CancellationToken ct = default)
         {
             return SendAsync<TourneyEntryModel>(HttpMethod.Post, $"api/tourney/{tourneyId}/entries",
@@ -97,8 +89,6 @@ namespace Mvc.GildeApp.mvc.Services
         {
             return SendAsync<object>(HttpMethod.Delete, $"api/tourney/{tourneyId}/entries/{entryId}", null, ct);
         }
-
-        // ---- plumbing ------------------------------------------------------
 
         private async Task<T?> GetAsync<T>(string url, CancellationToken ct)
         {
@@ -154,11 +144,6 @@ namespace Mvc.GildeApp.mvc.Services
                 return ApiCallResult<T>.Fail("The API sent back a response the app could not read.");
             }
         }
-
-        /// <summary>
-        /// The API returns errors three ways: a bare string array, a { message } object,
-        /// or an MVC ModelState dictionary. Flatten whichever arrived into plain lines.
-        /// </summary>
         private static List<string> ReadErrors(string raw, System.Net.HttpStatusCode status)
         {
             var fallback = new List<string> { $"The request failed ({(int)status})." };
