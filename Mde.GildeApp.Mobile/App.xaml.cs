@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Mde.GildeApp.Mobile;
 
-namespace Mde.GildeApp.Mobile
+namespace GildeApp.Mobile
 {
     public partial class App : Application
     {

@@ -1,14 +1,77 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Mde.GildeApp.Mobile"
-             x:Class="Mde.GildeApp.Mobile.App">
+             x:Class="GildeApp.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Same palette as the web app: steel neutrals, the two lamp colours. -->
+            <Color x:Key="Ground">#ECEEF1</Color>
+            <Color x:Key="Surface">#FFFFFF</Color>
+            <Color x:Key="Surface2">#F5F7F9</Color>
+            <Color x:Key="Ink">#14171B</Color>
+            <Color x:Key="Muted">#5A636E</Color>
+            <Color x:Key="Line">#D7DCE2</Color>
+            <Color x:Key="Green">#0E7A4F</Color>
+            <Color x:Key="GreenSoft">#E4F3EC</Color>
+            <Color x:Key="Red">#A82A31</Color>
+            <Color x:Key="RedSoft">#F9E8E8</Color>
+            <Color x:Key="Amber">#9A6408</Color>
+            <Color x:Key="AmberSoft">#FBF0DC</Color>
+
+            <Style TargetType="Page" ApplyToDerivedTypes="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource Ground}" />
+            </Style>
+
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Ink}" />
+                <Setter Property="FontSize" Value="15" />
+            </Style>
+
+            <Style x:Key="H1" TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Ink}" />
+                <Setter Property="FontSize" Value="26" />
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
+
+            <Style x:Key="Lede" TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Muted}" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+                <Setter Property="Stroke" Value="{StaticResource Line}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="Padding" Value="14" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 6" />
+            </Style>
+
+            <Style TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Green}" />
+                <Setter Property="TextColor" Value="#FFFFFF" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="HeightRequest" Value="48" />
+            </Style>
+
+            <Style x:Key="SecondaryButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+                <Setter Property="TextColor" Value="{StaticResource Ink}" />
+                <Setter Property="BorderColor" Value="{StaticResource Line}" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="HeightRequest" Value="46" />
+            </Style>
+
+            <Style TargetType="Entry">
+                <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+                <Setter Property="TextColor" Value="{StaticResource Ink}" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>
