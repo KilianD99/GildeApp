@@ -60,6 +60,7 @@ namespace GildeApp.Api.Core.Data
             modelBuilder.Entity<Match>(match =>
             {
                 match.Property(m => m.Status).HasConversion<int>();
+                match.Property(m => m.ClaimedBy).HasMaxLength(100);
 
                 match.HasOne(m => m.Tourney)
                      .WithMany(t => t.Matches)

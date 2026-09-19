@@ -7,6 +7,10 @@ namespace GildeApp.Api.Extensions
     {
         public static BoardDto ToBoardDto(this Tourney tourney)
         {
+            // One timestamp for the whole projection, so every claim on the board is
+            // judged against the same instant.
+            var nowUtc = DateTime.UtcNow;
+
             var entries = tourney.Entries
                 .OrderBy(e => e.Position)
                 .ToList();
@@ -103,7 +107,8 @@ namespace GildeApp.Api.Extensions
                     SecondPosition = positionByEntryId.TryGetValue(m.SecondEntryId, out var sp) ? sp : 0,
                     SecondName = m.SecondEntry?.Player?.FullName ?? string.Empty,
                     SecondScore = m.SecondScore,
-                    UpdatedAt = m.UpdatedAt
+                    UpdatedAt = m.UpdatedAt,
+                    ClaimedBy = m.IsClaimedAt(nowUtc) ? m.ClaimedBy : null
                 }).ToList()
             };
         }

@@ -1,4 +1,4 @@
-﻿namespace GildeApp.Api.Dtos.Matches
+namespace GildeApp.Api.Dtos.Matches
 {
     public class MatchDto
     {
@@ -18,5 +18,15 @@
         public int SecondScore { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>Judge currently scoring this match, or null if it is free.</summary>
+        public string? ClaimedBy { get; set; }
+
+        /// <summary>
+        /// Whether the claim was still live when this response was built. Sent as a
+        /// plain flag so clients never have to compare their own clock to the
+        /// server's — phones drift.
+        /// </summary>
+        public bool IsClaimed { get; set; }
     }
 }

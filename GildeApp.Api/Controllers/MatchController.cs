@@ -1,4 +1,4 @@
-﻿using GildeApp.Api.Core.Entities;
+using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
 using GildeApp.Api.Core.Services.Models;
 using GildeApp.Api.Dtos.Matches;
@@ -12,6 +12,14 @@ namespace GildeApp.Api.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
+        /// <summary>
+        /// The judge's name, sent by the mobile app on every scoring call. This is
+        /// not authentication -- anyone can put any name in this header. It exists so
+        /// the app can say "Marie is on this one" instead of "taken". Swap it for a
+        /// real token before this runs anywhere public.
+        /// </summary>
+        public const string JudgeHeader = "X-Judge-Name";
+
         protected readonly IMatchService _matchService;
         private readonly BoardBroadcaster _broadcaster;
 
@@ -20,6 +28,11 @@ namespace GildeApp.Api.Controllers
             _matchService = matchService;
             _broadcaster = broadcaster;
         }
+
+        private string? JudgeName =>
+            Request.Headers.TryGetValue(JudgeHeader, out var values)
+                ? values.FirstOrDefault()?.Trim()
+                : null;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -56,17 +69,67 @@ namespace GildeApp.Api.Controllers
             return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
         }
 
+        /// <summary>
+        /// Takes the match so nobody else can score it, or renews a claim this judge
+        /// already holds. 409 means another judge got there first.
+        /// </summary>
+        [HttpPost("{id}/claim")]
+        public async Task<IActionResult> Claim(Guid id)
+        {
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
+            var result = await _matchService.ClaimAsync(id, judge);
+
+            if (!result.IsSuccess)
+                return Conflict(result.Errors);
+
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
+
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
+        }
+
+        /// <summary>Hands the match back without finishing it.</summary>
+        [HttpPost("{id}/release")]
+        public async Task<IActionResult> Release(Guid id)
+        {
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
+            var result = await _matchService.ReleaseAsync(id, judge);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
+
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
+
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
+        }
+
+        /// <summary>
+        /// What the app posts after each touch. Send Finish = false for a live score,
+        /// true to lock the result in. Every successful call renews the claim.
+        /// </summary>
         [HttpPut("{id}/score")]
         public async Task<IActionResult> SubmitScore(Guid id, MatchCreateOrUpdateDto scoreDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
             var result = await _matchService.SubmitScoreAsync(
-                id, scoreDto.FirstScore, scoreDto.SecondScore, scoreDto.Finish);
+                id, scoreDto.FirstScore, scoreDto.SecondScore, scoreDto.Finish, judge);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Errors);
+                return Conflict(result.Errors);
 
             await _broadcaster.BroadcastAsync(result.Data.TourneyId);
 
@@ -104,6 +167,5 @@ namespace GildeApp.Api.Controllers
 
             return Ok(new { message = $"Match {existing.Data.Id} deleted successfully" });
         }
-
     }
 }

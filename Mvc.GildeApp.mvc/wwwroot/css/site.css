@@ -865,3 +865,23 @@ code, .mono {
     outline: 2px solid var(--green);
     outline-offset: 2px;
 }
+
+/* ---- judge on a match (pushed from the mobile app) ---- */
+
+.judge-badge {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+    padding: 2px 8px;
+    border-radius: 100px;
+    border: 1px solid var(--green);
+    background: var(--green-soft);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .02em;
+    text-transform: none;
+}

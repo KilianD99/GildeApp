@@ -52,8 +52,13 @@ namespace GildeApp.Api
             {
                 app.MapOpenApi();   // /openapi/v1.json
             }
-
-            app.UseHttpsRedirection();
+            else
+            {
+                // Off in Development so the Android emulator can reach the API over
+                // plain HTTP. The emulator does not trust the local dev certificate,
+                // and a 307 to https would fail there before the request lands.
+                app.UseHttpsRedirection();
+            }
 
             app.UseCors(WebAppCors);
 

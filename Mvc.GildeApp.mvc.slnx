@@ -7,4 +7,5 @@
     <Project Path="Mvc.GildeApp.mvc/Mvc.GildeApp.mvc.csproj" />
   </Folder>
   <Folder Name="/Libaries/" />
+  <Project Path="GildeApp.Mobile/GildeApp.Mobile.csproj" />
 </Solution>

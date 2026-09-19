@@ -1,4 +1,4 @@
-﻿namespace GildeApp.Api.Dtos.Boards
+namespace GildeApp.Api.Dtos.Boards
 {
     public class BoardMatchDto
     {
@@ -15,5 +15,7 @@
         public int SecondScore { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        public string? ClaimedBy { get; set; }
     }
 }

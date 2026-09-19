@@ -99,9 +99,20 @@
                 }
             }
 
+            // While a judge holds the match, their name replaces the status so the
+            // desk can see who is on which piste.
             var status = row.querySelector(".match-status");
             if (status) {
-                status.textContent = match.status;
+                if (match.claimedBy) {
+                    status.innerHTML = "";
+                    var badge = document.createElement("span");
+                    badge.className = "judge-badge";
+                    badge.textContent = match.claimedBy;
+                    badge.title = "Being scored by " + match.claimedBy;
+                    status.appendChild(badge);
+                } else if (status.textContent.trim() !== match.status) {
+                    status.textContent = match.status;
+                }
             }
         });
     }

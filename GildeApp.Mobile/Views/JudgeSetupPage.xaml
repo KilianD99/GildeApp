@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GildeApp.Mobile.Views.JudgeSetupPage"
+             Title="Who is judging?">
+
+    <VerticalStackLayout Padding="20" Spacing="18">
+
+        <Label Text="Who is judging?" Style="{StaticResource H1}" />
+
+        <Label Style="{StaticResource Lede}"
+               Text="Your name shows on the board next to the match you are scoring, so the desk can see who is on which piste." />
+
+        <Entry Placeholder="First and last name"
+               Text="{Binding Name}"
+               ReturnType="Done"
+               MaxLength="100" />
+
+        <Label Text="{Binding ErrorMessage}"
+               IsVisible="{Binding HasError}"
+               TextColor="{StaticResource Red}"
+               FontSize="14" />
+
+        <Button Text="Save" Command="{Binding SaveCommand}" />
+
+        <Label Style="{StaticResource Lede}"
+               Text="This is not a login. Anyone can type any name — it is only here so a claimed match can say who has it." />
+
+    </VerticalStackLayout>
+
+</ContentPage>

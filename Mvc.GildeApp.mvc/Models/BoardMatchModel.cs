@@ -12,5 +12,8 @@
         public string SecondName { get; set; } = string.Empty;
         public int SecondScore { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>Judge currently scoring this match on the mobile app.</summary>
+        public string? ClaimedBy { get; set; }
     }
 }

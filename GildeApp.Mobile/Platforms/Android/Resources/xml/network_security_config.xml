@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android blocks plain HTTP by default. The dev API runs on the machine hosting the
+  emulator, reachable at 10.0.2.2, with a certificate the emulator does not trust -
+  so for development we allow cleartext to that host only.
+
+  When you run against a real server, delete this file, drop the
+  android:networkSecurityConfig line from AndroidManifest.xml, and point the app at
+  an https:// address.
+-->
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <!-- The emulator's alias for the host machine's localhost. -->
+    <domain includeSubdomains="false">10.0.2.2</domain>
+    <!-- Uncomment and edit if you test from a real phone on the same wifi. -->
+    <!-- <domain includeSubdomains="false">192.168.1.20</domain> -->
+  </domain-config>
+</network-security-config>
