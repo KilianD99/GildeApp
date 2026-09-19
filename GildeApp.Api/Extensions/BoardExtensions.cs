@@ -6,7 +6,9 @@ namespace GildeApp.Api.Extensions
     public static class BoardExtensions
     {
         public static BoardDto ToBoardDto(this Tourney tourney)
-        {
+        {           
+            var nowUtc = DateTime.UtcNow;
+
             var entries = tourney.Entries
                 .OrderBy(e => e.Position)
                 .ToList();
@@ -55,8 +57,7 @@ namespace GildeApp.Api.Extensions
 
                     if (match is not null && match.Status != MatchStatus.Scheduled)
                     {
-                        // Read the match from this row's side of the diagonal.
-                        var isFirst = match.FirstEntryId == entry.Id;
+                          var isFirst = match.FirstEntryId == entry.Id;
 
                         cell.Score = isFirst ? match.FirstScore : match.SecondScore;
                         cell.OpponentScore = isFirst ? match.SecondScore : match.FirstScore;
@@ -103,7 +104,8 @@ namespace GildeApp.Api.Extensions
                     SecondPosition = positionByEntryId.TryGetValue(m.SecondEntryId, out var sp) ? sp : 0,
                     SecondName = m.SecondEntry?.Player?.FullName ?? string.Empty,
                     SecondScore = m.SecondScore,
-                    UpdatedAt = m.UpdatedAt
+                    UpdatedAt = m.UpdatedAt,
+                    ClaimedBy = m.IsClaimedAt(nowUtc) ? m.ClaimedBy : null
                 }).ToList()
             };
         }

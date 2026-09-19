@@ -15,5 +15,7 @@
         public int SecondScore { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        public string? ClaimedBy { get; set; }
     }
 }

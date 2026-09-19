@@ -12,6 +12,8 @@ namespace GildeApp.Api.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
+        public const string JudgeHeader = "X-Judge-Name";
+
         protected readonly IMatchService _matchService;
         private readonly BoardBroadcaster _broadcaster;
 
@@ -20,6 +22,11 @@ namespace GildeApp.Api.Controllers
             _matchService = matchService;
             _broadcaster = broadcaster;
         }
+
+        private string? JudgeName =>
+            Request.Headers.TryGetValue(JudgeHeader, out var values)
+                ? values.FirstOrDefault()?.Trim()
+                : null;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -56,17 +63,58 @@ namespace GildeApp.Api.Controllers
             return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
         }
 
+        [HttpPost("{id}/claim")]
+        public async Task<IActionResult> Claim(Guid id)
+        {
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
+            var result = await _matchService.ClaimAsync(id, judge);
+
+            if (!result.IsSuccess)
+                return Conflict(result.Errors);
+
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
+
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
+        }
+
+        [HttpPost("{id}/release")]
+        public async Task<IActionResult> Release(Guid id)
+        {
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
+            var result = await _matchService.ReleaseAsync(id, judge);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Errors);
+
+            await _broadcaster.BroadcastAsync(result.Data.TourneyId);
+
+            return Ok(new ResultModel<MatchDetailDto> { Data = result.Data.ToDetailMatchDto() });
+        }
+
         [HttpPut("{id}/score")]
         public async Task<IActionResult> SubmitScore(Guid id, MatchCreateOrUpdateDto scoreDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var judge = JudgeName;
+
+            if (string.IsNullOrWhiteSpace(judge))
+                return BadRequest(new { message = $"Missing {JudgeHeader} header" });
+
             var result = await _matchService.SubmitScoreAsync(
-                id, scoreDto.FirstScore, scoreDto.SecondScore, scoreDto.Finish);
+                id, scoreDto.FirstScore, scoreDto.SecondScore, scoreDto.Finish, judge);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Errors);
+                return Conflict(result.Errors);
 
             await _broadcaster.BroadcastAsync(result.Data.TourneyId);
 
@@ -104,6 +152,5 @@ namespace GildeApp.Api.Controllers
 
             return Ok(new { message = $"Match {existing.Data.Id} deleted successfully" });
         }
-
     }
 }

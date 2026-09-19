@@ -15,7 +15,10 @@ namespace GildeApp.Api.Core.Services.Interfaces
         Task<bool> DoesMatchIdExistsAsync(Guid id);
 
         Task<ResultModel<Match>> DeleteAsync(Match entity);
-        Task<ResultModel<Match>> SubmitScoreAsync(Guid matchId, int firstScore, int secondScore, bool finish);
         Task<ResultModel<Match>> ReopenAsync(Guid matchId);
+        Task<ResultModel<Match>> ClaimAsync(Guid matchId, string judgeName);
+        Task<ResultModel<Match>> ReleaseAsync(Guid matchId, string judgeName);
+        Task<ResultModel<Match>> SubmitScoreAsync(Guid matchId, int firstScore, int secondScore, bool finish, string judgeName);
+
     }
 }

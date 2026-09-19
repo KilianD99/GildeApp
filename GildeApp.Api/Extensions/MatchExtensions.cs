@@ -1,7 +1,5 @@
 ﻿using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Dtos.Matches;
-using GildeApp.Api.Dtos.Players;
-using GildeApp.Api.Dtos.Tourneys;
 
 namespace GildeApp.Api.Extensions
 {
@@ -9,6 +7,9 @@ namespace GildeApp.Api.Extensions
     {
         public static MatchDto ToMatchDto(this Match match)
         {
+            var now = DateTime.UtcNow;
+            var isClaimed = match.IsClaimedAt(now);
+
             return new MatchDto
             {
                 MatchId = match.Id,
@@ -26,7 +27,10 @@ namespace GildeApp.Api.Extensions
                 SecondName = match.SecondEntry?.Player?.FullName ?? string.Empty,
                 SecondScore = match.SecondScore,
 
-                UpdatedAt = match.UpdatedAt
+                UpdatedAt = match.UpdatedAt,
+
+                ClaimedBy = isClaimed ? match.ClaimedBy : null,
+                IsClaimed = isClaimed
             };
         }
 
@@ -37,6 +41,9 @@ namespace GildeApp.Api.Extensions
 
         public static MatchDetailDto ToDetailMatchDto(this Match match)
         {
+            var now = DateTime.UtcNow;
+            var isClaimed = match.IsClaimedAt(now);
+
             return new MatchDetailDto
             {
                 MatchId = match.Id,
@@ -55,6 +62,9 @@ namespace GildeApp.Api.Extensions
                 SecondScore = match.SecondScore,
 
                 UpdatedAt = match.UpdatedAt,
+
+                ClaimedBy = isClaimed ? match.ClaimedBy : null,
+                IsClaimed = isClaimed,
 
                 TourneyName = match.Tourney?.Name ?? string.Empty,
                 MaxScore = match.Tourney?.RuleSet?.MaxScore ?? 0

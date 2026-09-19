@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using GildeApp.Api.Core.Data;
 using GildeApp.Api.Core.Entities;
 using GildeApp.Api.Core.Services.Interfaces;
@@ -11,6 +10,8 @@ namespace GildeApp.Api.Core.Services
 {
     public class MatchService : IMatchService
     {
+        public static readonly TimeSpan ClaimDuration = TimeSpan.FromMinutes(2);
+
         private readonly ApplicationDbContext _dbContext;
 
         public MatchService(ApplicationDbContext dbContext)
@@ -82,19 +83,91 @@ namespace GildeApp.Api.Core.Services
         {
             return await _dbContext.Matches.AnyAsync(m => m.Id.Equals(id));
         }
-
-        public async Task<ResultModel<Match>> SubmitScoreAsync(Guid matchId, int firstScore, int secondScore, bool finish)
+        public async Task<ResultModel<Match>> ClaimAsync(Guid matchId, string judgeName)
         {
             var resultModel = new ResultModel<Match>();
 
-            var match = await _dbContext.Matches
-                .Include(m => m.Tourney)
-                    .ThenInclude(t => t.RuleSet)
-                .Include(m => m.FirstEntry)
-                    .ThenInclude(e => e.Player)
-                .Include(m => m.SecondEntry)
-                    .ThenInclude(e => e.Player)
-                .FirstOrDefaultAsync(m => m.Id == matchId);
+            var match = await WithPlayers().FirstOrDefaultAsync(m => m.Id == matchId);
+
+            if (match is null)
+            {
+                resultModel.Errors.Add("Match does not exist");
+                return resultModel;
+            }
+
+            if (match.Status == MatchStatus.Finished)
+            {
+                resultModel.Errors.Add("This match is already finished");
+                return resultModel;
+            }
+
+            if (match.Tourney.Status != TourneyStatus.Running)
+            {
+                resultModel.Errors.Add("This tourney is not running");
+                return resultModel;
+            }
+
+            if (!await TryTakeClaimAsync(matchId, judgeName))
+            {
+                resultModel.Errors.Add($"{match.ClaimedBy} is scoring this match right now");
+                return resultModel;
+            }
+
+            await _dbContext.Entry(match).ReloadAsync();
+
+            resultModel.Data = match;
+            return resultModel;
+        }
+
+        private async Task<bool> TryTakeClaimAsync(Guid matchId, string judgeName)
+        {
+            var now = DateTime.UtcNow;
+            var expires = now.Add(ClaimDuration);
+
+            var rowsChanged = await _dbContext.Matches
+                .Where(m => m.Id == matchId
+                            && (m.ClaimedBy == null
+                                || m.ClaimedBy == judgeName
+                                || m.ClaimExpiresAt == null
+                                || m.ClaimExpiresAt < now))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(m => m.ClaimedBy, judgeName)
+                    .SetProperty(m => m.ClaimExpiresAt, expires));
+
+            return rowsChanged > 0;
+        }
+
+        public async Task<ResultModel<Match>> ReleaseAsync(Guid matchId, string judgeName)
+        {
+            var resultModel = new ResultModel<Match>();
+
+            var match = await WithPlayers().FirstOrDefaultAsync(m => m.Id == matchId);
+
+            if (match is null)
+            {
+                resultModel.Errors.Add("Match does not exist");
+                return resultModel;
+            }
+
+            var heldByOther = match.IsClaimedAt(DateTime.UtcNow) && match.ClaimedBy != judgeName;
+
+            if (!heldByOther && match.ClaimedBy is not null)
+            {
+                match.ClaimedBy = null;
+                match.ClaimExpiresAt = null;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            resultModel.Data = match;
+            return resultModel;
+        }
+
+        public async Task<ResultModel<Match>> SubmitScoreAsync(
+            Guid matchId, int firstScore, int secondScore, bool finish, string judgeName)
+        {
+            var resultModel = new ResultModel<Match>();
+
+            var match = await WithPlayers().FirstOrDefaultAsync(m => m.Id == matchId);
 
             if (match is null)
             {
@@ -128,10 +201,24 @@ namespace GildeApp.Api.Core.Services
                 return resultModel;
             }
 
+            if (!await TryTakeClaimAsync(matchId, judgeName))
+            {
+                resultModel.Errors.Add($"{match.ClaimedBy} is scoring this match right now");
+                return resultModel;
+            }
+
+            await _dbContext.Entry(match).ReloadAsync();
+
             match.FirstScore = firstScore;
             match.SecondScore = secondScore;
             match.Status = finish ? MatchStatus.Finished : MatchStatus.InProgress;
             match.UpdatedAt = DateTime.UtcNow;
+
+            if (finish)
+            {
+                match.ClaimedBy = null;
+                match.ClaimExpiresAt = null;
+            }
 
             await _dbContext.SaveChangesAsync();
 
@@ -159,6 +246,8 @@ namespace GildeApp.Api.Core.Services
 
             match.Status = MatchStatus.InProgress;
             match.UpdatedAt = DateTime.UtcNow;
+            match.ClaimedBy = null;
+            match.ClaimExpiresAt = null;
 
             await _dbContext.SaveChangesAsync();
 
@@ -173,5 +262,7 @@ namespace GildeApp.Api.Core.Services
 
             return new ResultModel<Match> { Data = entity };
         }
+
+
     }
 }
