@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:GildeApp.Mobile.Models"
-             x:Class="GildeApp.Mobile.Views.TourneysPage"
-             Title="Tourneys">
+             xmlns:models="clr-namespace:GildeApp.Mobile.Core.Models"
+             x:Class="GildeApp.Mobile.Views.MatchesPage"
+             Title="{Binding TourneyName}">
 
     <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
 
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="10">
-            <VerticalStackLayout Grid.Column="0" Spacing="2">
-                <Label Text="Running now" Style="{StaticResource H1}" />
-                <Label Text="{Binding JudgeLine}" Style="{StaticResource Lede}" />
-            </VerticalStackLayout>
-            <Button Grid.Column="1"
-                    Text="Change"
-                    Style="{StaticResource SecondaryButton}"
-                    WidthRequest="90"
-                    Command="{Binding ChangeJudgeCommand}" />
-        </Grid>
+        <Label Grid.Row="0"
+               Style="{StaticResource Lede}"
+               Text="Tap a match to score it. A match someone else is already on cannot be opened." />
 
         <Label Grid.Row="1"
                Text="{Binding ErrorMessage}"
@@ -30,29 +22,42 @@
         <RefreshView Grid.Row="2"
                      IsRefreshing="{Binding IsBusy}"
                      Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Tourneys}"
+            <CollectionView ItemsSource="{Binding Matches}"
                             SelectionMode="Single"
-                            SelectionChanged="OnTourneySelected">
+                            SelectionChanged="OnMatchSelected">
 
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout Padding="20" Spacing="8">
-                        <Label Text="Nothing running"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center" />
-                        <Label Style="{StaticResource Lede}"
-                               HorizontalTextAlignment="Center"
-                               Text="A tourney shows up here once it has been started on the website. Pull down to check again." />
-                    </VerticalStackLayout>
+                    <Label Padding="20"
+                           Style="{StaticResource Lede}"
+                           HorizontalTextAlignment="Center"
+                           Text="No matches in this tourney yet." />
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:TourneyModel">
+                    <DataTemplate x:DataType="models:MatchModel">
                         <Border Style="{StaticResource Card}" Margin="0,0,0,10">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{Binding Name}" FontSize="17" FontAttributes="Bold" />
-                                <Label Text="{Binding Subtitle}" Style="{StaticResource Lede}" />
-                            </VerticalStackLayout>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+
+                                <!-- Colour bar: green free, amber taken, grey done. -->
+                                <BoxView Grid.Column="0"
+                                         WidthRequest="4"
+                                         CornerRadius="2"
+                                         Color="{Binding StateColor}" />
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                    <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" />
+                                    <Label Text="{Binding StateLine}"
+                                           FontSize="13"
+                                           TextColor="{Binding StateColor}" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2"
+                                       Text="{Binding ScoreLine}"
+                                       FontSize="19"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center" />
+
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

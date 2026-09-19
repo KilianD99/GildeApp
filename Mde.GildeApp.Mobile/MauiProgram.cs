@@ -1,29 +1,16 @@
-﻿using GildeApp.Mobile.Services;
+﻿// IGildeApi lives in Core/Services/Interfaces, JudgeIdentity and GildeApi in
+// Core/Services but under the shorter GildeApp.Mobile.Services namespace -- both
+// have to be imported here or AddHttpClient<IGildeApi, GildeApi> will not compile.
+using GildeApp.Mobile.Core.Services.Interfaces;
+using GildeApp.Mobile.Services;
 using GildeApp.Mobile.ViewModels;
 using GildeApp.Mobile.Views;
-using Mde.GildeApp.Mobile;
 using Microsoft.Extensions.Logging;
 
 namespace GildeApp.Mobile
 {
     public static class MauiProgram
     {
-        /// <summary>
-        /// Where the API lives, as seen from the device.
-        ///
-        /// 10.0.2.2 is the Android emulator's alias for the host machine's localhost,
-        /// so this reaches the API running in Visual Studio. Port 5069 is the API's
-        /// HTTP endpoint from its launchSettings.json -- plain HTTP because the
-        /// emulator does not trust the local dev certificate.
-        ///
-        /// Testing on a real phone instead: use the PC's LAN address
-        /// (http://192.168.x.x:5069), add that address to
-        /// Platforms/Android/Resources/xml/network_security_config.xml, and make the
-        /// API listen beyond localhost with
-        ///     dotnet run --urls http://0.0.0.0:5069
-        /// </summary>
-        public const string ApiBaseUrl = "http://10.0.2.2:5069/";
-
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -34,10 +21,14 @@ namespace GildeApp.Mobile
             builder.UseMauiApp<App>();
 
             builder.Services.AddSingleton<JudgeIdentity>();
+            builder.Services.AddSingleton<ServerSettings>();
 
+            // No BaseAddress here on purpose. The server address is a setting the
+            // judge can change on the setup screen, and BaseAddress is fixed when the
+            // client is built at startup -- so GildeApi builds an absolute URI per
+            // request from ServerSettings instead.
             builder.Services.AddHttpClient<IGildeApi, GildeApi>(client =>
             {
-                client.BaseAddress = new Uri(ApiBaseUrl);
                 client.Timeout = TimeSpan.FromSeconds(15);
             });
 

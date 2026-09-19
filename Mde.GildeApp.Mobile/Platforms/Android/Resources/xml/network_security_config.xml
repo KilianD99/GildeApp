@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEVELOPMENT ONLY.
+
+  Android blocks plain HTTP by default; without this the app dies on its first API
+  call with "Cleartext HTTP traffic not permitted".
+
+  The server address is a setting the judge types in the app, so the specific host is
+  not known when this file is compiled - which is why cleartext is permitted broadly
+  rather than for one listed domain. That is fine on a club wifi against a dev API and
+  is not fine in a shop.
+
+  Before this goes anywhere real: put the API behind https with a certificate the
+  phone trusts, delete this file, and drop the android:networkSecurityConfig line from
+  AndroidManifest.xml. Android then refuses cleartext again on its own.
+-->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -2,30 +2,53 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GildeApp.Mobile.Views.JudgeSetupPage"
-             Title="Who is judging?">
+             Title="Setup">
 
-    <VerticalStackLayout Padding="20" Spacing="18">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
 
-        <Label Text="Who is judging?" Style="{StaticResource H1}" />
+            <Label Text="Who is judging?" Style="{StaticResource H1}" />
 
-        <Label Style="{StaticResource Lede}"
-               Text="Your name shows on the board next to the match you are scoring, so the desk can see who is on which piste." />
+            <Label Style="{StaticResource Lede}"
+                   Text="Your name shows on the board next to the match you are scoring, so the desk can see who is on which piste." />
 
-        <Entry Placeholder="First and last name"
-               Text="{Binding Name}"
-               ReturnType="Done"
-               MaxLength="100" />
+            <Entry Placeholder="First and last name"
+                   Text="{Binding Name}"
+                   ReturnType="Next"
+                   MaxLength="100" />
 
-        <Label Text="{Binding ErrorMessage}"
-               IsVisible="{Binding HasError}"
-               TextColor="{StaticResource Red}"
-               FontSize="14" />
+            <BoxView HeightRequest="1"
+                     Color="{StaticResource Line}"
+                     Margin="0,4" />
 
-        <Button Text="Save" Command="{Binding SaveCommand}" />
+            <Label Text="Scoring server" Style="{StaticResource H1}" />
 
-        <Label Style="{StaticResource Lede}"
-               Text="This is not a login. Anyone can type any name — it is only here so a claimed match can say who has it." />
+            <Label Style="{StaticResource Lede}"
+                   Text="The address of the machine running the API. On the emulator that is 10.0.2.2; on a real phone it is the PC's address on the same wifi." />
 
-    </VerticalStackLayout>
+            <Entry Placeholder="192.168.1.20:5069"
+                   Text="{Binding ServerUrl}"
+                   Keyboard="Url"
+                   ReturnType="Done"
+                   MaxLength="200" />
+
+            <Button Text="Use emulator address"
+                    Style="{StaticResource SecondaryButton}"
+                    Command="{Binding UseEmulatorAddressCommand}" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding HasError}"
+                   TextColor="{StaticResource Red}"
+                   BackgroundColor="{StaticResource RedSoft}"
+                   Padding="12"
+                   FontSize="14" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+
+            <Label Style="{StaticResource Lede}"
+                   Text="The name is not a login. Anyone can type any name — it is only here so a claimed match can say who has it." />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

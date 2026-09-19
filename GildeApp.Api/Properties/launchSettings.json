@@ -19,6 +19,16 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "lan": {
+      "//": "Pick this one to test from a real phone. 0.0.0.0 listens on every network interface instead of just localhost, so another device on the same wifi can reach it. Windows Firewall will ask the first time - allow it on private networks.",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://0.0.0.0:5069",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

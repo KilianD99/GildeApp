@@ -1,6 +1,4 @@
-﻿using Mde.GildeApp.Mobile;
-
-namespace GildeApp.Mobile
+﻿namespace GildeApp.Mobile
 {
     public partial class App : Application
     {

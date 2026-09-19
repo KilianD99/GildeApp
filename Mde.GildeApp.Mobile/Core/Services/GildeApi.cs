@@ -18,11 +18,13 @@ namespace GildeApp.Mobile.Services
 
         private readonly HttpClient _http;
         private readonly JudgeIdentity _judge;
+        private readonly ServerSettings _server;
 
-        public GildeApi(HttpClient http, JudgeIdentity judge)
+        public GildeApi(HttpClient http, JudgeIdentity judge, ServerSettings server)
         {
             _http = http;
             _judge = judge;
+            _server = server;
         }
 
         public async Task<ApiCall<List<TourneyModel>>> GetRunningTourneysAsync(CancellationToken ct = default)
@@ -71,7 +73,11 @@ namespace GildeApp.Mobile.Services
         }
         private HttpRequestMessage BuildRequest(HttpMethod method, string url, object? body)
         {
-            var request = new HttpRequestMessage(method, url);
+            // Absolute URI built per request rather than relying on
+            // HttpClient.BaseAddress: BaseAddress is fixed when the client is created
+            // at startup, so a judge changing the server address in settings would
+            // otherwise keep hitting the old one until the app restarted.
+            var request = new HttpRequestMessage(method, new Uri(_server.BaseUri, url));
 
             if (_judge.Name is { } name)
                 request.Headers.Add(JudgeHeader, name);
@@ -118,7 +124,13 @@ namespace GildeApp.Mobile.Services
             catch (HttpRequestException)
             {
                 return ApiCall<T>.Fail(
-                    "Cannot reach the scoring server. Check the wifi and that the API is running.");
+                    $"Cannot reach the scoring server at {_server.BaseUrl}. " +
+                    "Check the wifi, the address in settings, and that the API is running.");
+            }
+            catch (UriFormatException)
+            {
+                return ApiCall<T>.Fail(
+                    $"'{_server.BaseUrl}' is not a usable server address. Fix it in settings.");
             }
             catch (JsonException)
             {
