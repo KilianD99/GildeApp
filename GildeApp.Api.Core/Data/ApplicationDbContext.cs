@@ -52,7 +52,7 @@ namespace GildeApp.Api.Core.Data
                      .WithMany(p => p.Entries)
                      .HasForeignKey(e => e.PlayerId)
                      .OnDelete(DeleteBehavior.Restrict);
-                   
+
                 entry.HasIndex(e => new { e.TourneyId, e.Position }).IsUnique();
                 entry.HasIndex(e => new { e.TourneyId, e.PlayerId }).IsUnique();
             });
@@ -60,6 +60,7 @@ namespace GildeApp.Api.Core.Data
             modelBuilder.Entity<Match>(match =>
             {
                 match.Property(m => m.Status).HasConversion<int>();
+                match.Property(m => m.ClaimedBy).HasMaxLength(100);
 
                 match.HasOne(m => m.Tourney)
                      .WithMany(t => t.Matches)

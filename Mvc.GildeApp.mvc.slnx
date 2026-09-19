@@ -4,6 +4,7 @@
     <Project Path="GildeApp.Api/GildeApp.Api.csproj" />
   </Folder>
   <Folder Name="/Clients/">
+    <Project Path="Mde.GildeApp.Mobile/Mde.GildeApp.Mobile.csproj" Id="76f7c236-397e-4371-8f6e-28cb4936403d" />
     <Project Path="Mvc.GildeApp.mvc/Mvc.GildeApp.mvc.csproj" />
   </Folder>
   <Folder Name="/Libaries/" />

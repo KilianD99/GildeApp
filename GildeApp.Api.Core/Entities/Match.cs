@@ -23,5 +23,10 @@ namespace GildeApp.Api.Core.Entities
         public int Order { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        public string? ClaimedBy { get; set; }
+        public DateTime? ClaimExpiresAt { get; set; }
+        public bool IsClaimedAt(DateTime utcNow) =>
+            ClaimedBy is not null && ClaimExpiresAt is not null && ClaimExpiresAt > utcNow;
     }
 }
