@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GildeApp.Mobile.Views.ScorePage"
+             Title="Scoring">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="16" RowSpacing="14">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="2">
+            <Label Text="{Binding TourneyName}" Style="{StaticResource Lede}" />
+            <Label Text="{Binding MaxScoreLine}" Style="{StaticResource Lede}" />
+        </VerticalStackLayout>
+
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               IsVisible="{Binding HasError}"
+               TextColor="{StaticResource Red}"
+               BackgroundColor="{StaticResource RedSoft}"
+               Padding="12"
+               FontSize="14" />
+
+        <!-- Two columns, one per fencer. Big targets: this is tapped at arm's
+             length, on a piste, usually in a hurry. -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" ColumnSpacing="10">
+
+            <VerticalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                <Label Text="{Binding FirstName}"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="TailTruncation" />
+
+                <Label Text="{Binding FirstScore}"
+                       FontSize="76"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+
+                <Button Text="+1"
+                        HeightRequest="72"
+                        FontSize="24"
+                        IsEnabled="{Binding CanTap}"
+                        Command="{Binding FirstPlusCommand}" />
+
+                <Button Text="−1"
+                        Style="{StaticResource SecondaryButton}"
+                        IsEnabled="{Binding CanTap}"
+                        Command="{Binding FirstMinusCommand}" />
+            </VerticalStackLayout>
+
+            <Label Grid.Column="1"
+                   Text="–"
+                   FontSize="34"
+                   TextColor="{StaticResource Muted}"
+                   VerticalOptions="Center" />
+
+            <VerticalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
+                <Label Text="{Binding SecondName}"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="TailTruncation" />
+
+                <Label Text="{Binding SecondScore}"
+                       FontSize="76"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+
+                <Button Text="+1"
+                        HeightRequest="72"
+                        FontSize="24"
+                        IsEnabled="{Binding CanTap}"
+                        Command="{Binding SecondPlusCommand}" />
+
+                <Button Text="−1"
+                        Style="{StaticResource SecondaryButton}"
+                        IsEnabled="{Binding CanTap}"
+                        Command="{Binding SecondMinusCommand}" />
+            </VerticalStackLayout>
+
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="3" Spacing="6">
+            <Label Style="{StaticResource Lede}"
+                   HorizontalTextAlignment="Center"
+                   Text="Every tap shows on the website straight away." />
+
+            <Button Text="Submit final score"
+                    IsEnabled="{Binding CanScore}"
+                    Command="{Binding FinishCommand}" />
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>
